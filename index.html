@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إقرار تنازل عن سيارة — مؤسسة عائل الصميل</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+:root {
+  --navy: #1a1a2e;
+  --gold: #c9a84c;
+  --light: #f8f7f2;
+  --border: #d0ccc0;
+  --green: #1e7e34;
+  --green-light: #eafaf1;
+  --blue-light: #f0f6ff;
+  --auto-bg: #eef4ff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: #e8e4d9;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(26,26,46,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.08) 0%, transparent 50%);
+  min-height: 100vh;
+  padding: 20px 12px 40px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.page-header h1 {
+  font-size: 15px;
+  color: var(--navy);
+  opacity: 0.6;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.card {
+  background: #fff;
+  max-width: 720px;
+  margin: 0 auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 30px rgba(26,26,46,0.12), 0 1px 4px rgba(26,26,46,0.08);
+  overflow: hidden;
+}
+
+/* Header */
+.doc-header {
+  background: var(--navy);
+  color: white;
+  padding: 18px 22px 14px;
+  text-align: center;
+  position: relative;
+}
+.doc-header::after {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+}
+.company-name {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+.company-sub {
+  font-size: 11px;
+  opacity: 0.75;
+  margin-bottom: 8px;
+}
+.phones {
+  font-size: 11px;
+  opacity: 0.85;
+  direction: ltr;
+  letter-spacing: 0.3px;
+}
+
+.doc-title-bar {
+  background: var(--gold);
+  color: var(--navy);
+  text-align: center;
+  font-size: 17px;
+  font-weight: 900;
+  padding: 10px;
+  letter-spacing: 0.5px;
+}
+.doc-sub-bar {
+  background: #f0ede4;
+  text-align: center;
+  font-size: 11px;
+  color: #666;
+  padding: 5px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Body */
+.doc-body { padding: 16px 18px; }
+
+/* Sections */
+.section {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.section-title {
+  background: #f4f2eb;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.section-title span {
+  font-size: 14px;
+  margin-left: 5px;
+}
+.section-body { padding: 10px 12px; }
+.section-car { border-color: #b8d4f0; }
+.section-car .section-title { background: var(--blue-light); border-bottom-color: #b8d4f0; }
+
+/* Fields */
+.row { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.field { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 130px; }
+.field label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+  min-width: fit-content;
+}
+.field input[type="text"],
+.field input[type="tel"],
+.field input[type="date"],
+.field input[type="number"],
+.field input[type="email"] {
+  flex: 1;
+  border: none;
+  border-bottom: 1.5px solid #bbb;
+  font-size: 11px;
+  padding: 3px 4px;
+  background: transparent;
+  color: #1a1a1a;
+  outline: none;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+.field input:focus { border-bottom-color: var(--navy); }
+.field input.auto-field {
+  background: var(--auto-bg);
+  border-bottom-color: var(--navy);
+  font-weight: 700;
+  color: var(--navy);
+  border-radius: 4px;
+  padding: 3px 8px;
+  cursor: default;
+}
+.badge {
+  font-size: 8px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge-auto { background: var(--navy); color: white; }
+.badge-green { background: var(--green); color: white; }
+
+/* Price */
+.price-section { background: var(--blue-light); border-color: #b8d4f0; }
+.price-text-display {
+  background: var(--green-light);
+  border: 1px solid #a3d9b1;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  min-height: 30px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.price-text-display::before { content: '✍️'; font-size: 13px; }
+
+/* Checkboxes */
+.checks-list { display: flex; flex-direction: column; gap: 6px; }
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.check-item:hover { background: #f5f3ec; }
+.check-item input[type="checkbox"] {
+  width: 15px; height: 15px;
+  accent-color: var(--navy);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Notice */
+.notice {
+  background: #faf9f4;
+  border: 1px solid #ddd;
+  border-right: 3px solid var(--gold);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 10.5px;
+  line-height: 1.9;
+  color: #444;
+  margin-bottom: 12px;
+}
+
+/* Signatures */
+.sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.sig-box {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+.sig-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+.sig-line {
+  height: 36px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 8px;
+  position: relative;
+}
+.sig-line::after {
+  content: 'التوقيع';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #ccc;
+}
+.sig-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.sig-field label { font-size: 10px; color: #666; white-space: nowrap; }
+.sig-field input {
+  flex: 1;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  font-size: 10px;
+  text-align: center;
+  background: transparent;
+  color: #333;
+  font-family: 'Cairo', sans-serif;
+  outline: none;
+  padding: 1px;
+  direction: rtl;
+}
+
+/* Witnesses */
+.witness-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.witness-box {
+  border: 1px dashed #bbb;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.witness-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  color: #888;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.witness-box input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 10px;
+  background: transparent;
+  color: #333;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  outline: none;
+  padding: 2px;
+  margin-bottom: 5px;
+}
+
+/* Contact row */
+.contact-row {
+  background: #f8f7f2;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.contact-row label { font-size: 11px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+.contact-row input {
+  flex: 1;
+  border: none;
+  border-bottom: 1.5px solid #bbb;
+  font-size: 11px;
+  padding: 2px 4px;
+  background: transparent;
+  color: #333;
+  outline: none;
+  font-family: 'Cairo', sans-serif;
+  min-width: 120px;
+  direction: ltr;
+}
+.contact-row input:focus { border-bottom-color: var(--navy); }
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-bottom: 4px;
+}
+.btn {
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: 'Cairo', sans-serif;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(0); }
+.btn-pdf { background: var(--navy); color: white; }
+.btn-email { background: #c0392b; color: white; }
+.btn-wa { background: #25D366; color: white; }
+.btn-sheets { background: var(--green); color: white; }
+.btn-clear { background: white; color: #888; border: 1px solid #ccc; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy);
+  color: white;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-family: 'Cairo', sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+  z-index: 9999;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  direction: rtl;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Footer */
+.doc-footer {
+  background: #f4f2eb;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 10px;
+  color: #999;
+  padding: 8px;
+  margin-top: 4px;
+}
+
+@media (max-width: 500px) {
+  .sig-grid, .witness-grid { grid-template-columns: 1fr; }
+  .btn { font-size: 12px; padding: 8px 14px; }
+  .company-name { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>نظام إقرارات التنازل عن السيارات</h1>
+</div>
+
+<div class="card">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="company-name">مؤسسة عائل عبدالله الصميل التجارية</div>
+    <div class="company-sub">لتأجير الونشات وسحب السيارات — جدة</div>
+    <div class="phones">س.ت: 4030109150 &nbsp;|&nbsp; رقم العضوية: 52664</div>
+    <div class="phones" style="margin-top:4px">0558335503 &nbsp;·&nbsp; 0506691922 &nbsp;·&nbsp; 0503503443 &nbsp;·&nbsp; 0536500036</div>
+  </div>
+  <div class="doc-title-bar">إقرار تنازل عن سيارة</div>
+  <div class="doc-sub-bar">بيع ورش — متوسط في السيارات التالفة</div>
+
+  <div class="doc-body">
+
+    <!-- Meta -->
+    <div class="section">
+      <div class="section-title"><span>📋</span> بيانات الإقرار</div>
+      <div class="section-body">
+        <div class="row">
+          <div class="field">
+            <label>التاريخ:</label>
+            <input type="date" id="f_date">
+          </div>
+          <div class="field">
+            <label>رقم السند: <span class="badge badge-auto">تلقائي</span></label>
+            <input type="text" id="f_bond_no" class="auto-field" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seller -->
+    <div class="section">
+      <div class="section-title"><span>👤</span> بيانات المُقِر (المتنازل)</div>
+      <div class="section-body">
+        <div class="row">
+          <div class="field"><label>الاسم:</label><input type="text" id="f_seller_name" placeholder="الاسم الكامل"></div>
+          <div class="field"><label>الجنسية:</label><input type="text" id="f_seller_nat" placeholder="الجنسية"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>رقم الهوية:</label><input type="text" id="f_seller_id" placeholder="رقم الهوية / الإقامة"></div>
+          <div class="field"><label>تاريخ الإصدار:</label><input type="date" id="f_seller_id_date"></div>
+          <div class="field"><label>مصدرها:</label><input type="text" id="f_seller_id_src" placeholder="جهة الإصدار"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>جوال:</label><input type="tel" id="f_seller_mobile" placeholder="05xxxxxxxx"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Car -->
+    <div class="section section-car">
+      <div class="section-title"><span>🚗</span> بيانات السيارة</div>
+      <div class="section-body">
+        <div class="row">
+          <div class="field"><label>النوع:</label><input type="text" id="f_car_type" placeholder="نوع السيارة"></div>
+          <div class="field"><label>الموديل:</label><input type="text" id="f_car_model" placeholder="سنة الصنع"></div>
+          <div class="field"><label>اللون:</label><input type="text" id="f_car_color" placeholder="اللون"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>لوحة رقم:</label><input type="text" id="f_car_plate" placeholder="رقم اللوحة"></div>
+          <div class="field"><label>هيكل رقم:</label><input type="text" id="f_car_chassis" placeholder="رقم الشاصي"></div>
+        </div>
+        <div class="row">
+          <div class="field" style="flex:1">
+            <label>قيمة البيع (رقم):</label>
+            <input type="number" id="f_price_num" placeholder="مثال: 5000" min="0" oninput="convertToText()" style="direction:ltr">
+          </div>
+        </div>
+        <div class="price-text-display" id="f_price_text">
+          اكتب المبلغ بالأرقام ليظهر بالحروف تلقائياً <span class="badge badge-green">تلقائي</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buyer -->
+    <div class="section">
+      <div class="section-title"><span>👤</span> بيانات المتنازل إليه (المشتري)</div>
+      <div class="section-body">
+        <div class="row">
+          <div class="field"><label>الاسم:</label><input type="text" id="f_buyer_name" placeholder="الاسم الكامل"></div>
+          <div class="field"><label>الجنسية:</label><input type="text" id="f_buyer_nat" placeholder="الجنسية"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>رقم الهوية:</label><input type="text" id="f_buyer_id" placeholder="رقم الهوية / الإقامة"></div>
+          <div class="field"><label>تاريخ الإصدار:</label><input type="date" id="f_buyer_id_date"></div>
+          <div class="field"><label>مصدرها:</label><input type="text" id="f_buyer_id_src" placeholder="جهة الإصدار"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>جوال:</label><input type="tel" id="f_buyer_mobile" placeholder="05xxxxxxxx"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purpose -->
+    <div class="section">
+      <div class="section-title"><span>🎯</span> غرض البيع</div>
+      <div class="section-body">
+        <div class="checks-list">
+          <label class="check-item"><input type="checkbox" id="ch1"> البيع لغرض السكراب وإسقاط اللوحات</label>
+          <label class="check-item"><input type="checkbox" id="ch2"> البيع لغرض الإصلاح ونقل الملكية</label>
+          <label class="check-item"><input type="checkbox" id="ch3"> البيع لغرض التشليح وإسقاط اللوحات</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notice -->
+    <div class="notice">
+      في حال بيع السيارة سكراب يتم تسليم اللوحات للمالك وهو المسؤول عن رسوم الاستمارة والمرور ويتحمل إسقاطها من مكاتب التشليح.<br>
+      لا تعتبر هذه مبايعة رسمية لنقل ملكيتها لدى إدارة المرور فقط لضمان حق الطرفين.
+    </div>
+
+    <!-- Signatures -->
+    <div class="sig-grid">
+      <div class="sig-box">
+        <div class="sig-title">توقيع المُقِر</div>
+        <div class="sig-line"></div>
+        <div class="sig-field"><label>الاسم:</label><input type="text" id="s_seller_name" placeholder="الاسم"></div>
+        <div class="sig-field"><label>جوال:</label><input type="text" id="s_seller_mobile" placeholder="الجوال"></div>
+      </div>
+      <div class="sig-box">
+        <div class="sig-title">توقيع المتنازل إليه</div>
+        <div class="sig-line"></div>
+        <div class="sig-field"><label>الاسم:</label><input type="text" id="s_buyer_name" placeholder="الاسم"></div>
+        <div class="sig-field"><label>جوال:</label><input type="text" id="s_buyer_mobile" placeholder="الجوال"></div>
+      </div>
+    </div>
+
+    <!-- Witnesses -->
+    <div class="witness-grid">
+      <div class="witness-box">
+        <div class="witness-title">◈ شاهد أول</div>
+        <input type="text" id="f_w1_name" placeholder="اسم الشاهد">
+        <input type="text" id="f_w1_mobile" placeholder="رقم الجوال">
+      </div>
+      <div class="witness-box">
+        <div class="witness-title">◈ شاهد ثانٍ</div>
+        <input type="text" id="f_w2_name" placeholder="اسم الشاهد">
+        <input type="text" id="f_w2_mobile" placeholder="رقم الجوال">
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="contact-row">
+      <label>📧</label>
+      <input type="email" id="f_email" placeholder="البريد الإلكتروني للإرسال">
+      <label>📱</label>
+      <input type="tel" id="f_whatsapp" placeholder="966xxxxxxxxx (واتساب)">
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn btn-pdf" onclick="savePDF()">💾 حفظ PDF</button>
+      <button class="btn btn-email" onclick="sendEmail()">📧 إرسال بريد</button>
+      <button class="btn btn-wa" onclick="sendWhatsApp()">📱 واتساب</button>
+      <button class="btn btn-sheets" onclick="saveToSheets()">📊 حفظ في Sheets</button>
+      <button class="btn btn-clear" onclick="clearForm()">🗑 مسح</button>
+    </div>
+
+  </div><!-- /doc-body -->
+
+  <div class="doc-footer">
+    مؤسسة عائل عبدالله الصميل التجارية &nbsp;·&nbsp; جدة &nbsp;·&nbsp; جميع الحقوق محفوظة
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== تحويل الرقم إلى عربي =====
+const ones = ['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
+const tens_ar = ['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'];
+const hundreds_ar = ['','مئة','مئتان','ثلاثمئة','أربعمئة','خمسمئة','ستمئة','سبعمئة','ثمانمئة','تسعمئة'];
+
+function numToAr(n) {
+  n = Math.floor(Number(n));
+  if (!n || n <= 0) return '';
+  let result = '';
+  if (n >= 1000000) {
+    const m = Math.floor(n / 1000000);
+    result += (m===1?'مليون':m===2?'مليونان':m<=10?numToAr(m)+' ملايين':numToAr(m)+' مليون') + ' ';
+    n %= 1000000;
+  }
+  if (n >= 1000) {
+    const t = Math.floor(n / 1000);
+    result += (t===1?'ألف':t===2?'ألفان':t<=10?numToAr(t)+' آلاف':numToAr(t)+' ألف') + ' ';
+    n %= 1000;
+  }
+  if (n >= 100) { result += hundreds_ar[Math.floor(n/100)] + ' '; n %= 100; }
+  if (n >= 20) {
+    const t = Math.floor(n/10), o = n%10;
+    result += (o>0?ones[o]+' و':'')+tens_ar[t]+' ';
+  } else if (n > 0) { result += ones[n] + ' '; }
+  return result.trim();
+}
+
+function convertToText() {
+  const val = document.getElementById('f_price_num').value;
+  const box = document.getElementById('f_price_text');
+  if (!val || val <= 0) {
+    box.innerHTML = 'اكتب المبلغ بالأرقام ليظهر بالحروف تلقائياً <span class="badge badge-green">تلقائي</span>';
+    return;
+  }
+  const text = numToAr(parseInt(val));
+  box.textContent = text ? text + ' ريال سعودي فقط لا غير' : '—';
+}
+
+// ===== رقم السند التلقائي =====
+function generateBondNo() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const key = `bond_seq_${y}_${m}`;
+  let seq = parseInt(localStorage.getItem(key)||'0') + 1;
+  localStorage.setItem(key, seq);
+  return `SND-${y}${m}-${String(seq).padStart(4,'0')}`;
+}
+
+// ===== Toast =====
+function showToast(msg, dur=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function getVal(id) { return (document.getElementById(id)||{}).value?.trim()||''; }
+
+function getPriceText() {
+  const t = document.getElementById('f_price_text').textContent;
+  return t.includes('اكتب') ? '' : t;
+}
+
+function getFormData() {
+  return {
+    date: getVal('f_date'), bond_no: getVal('f_bond_no'),
+    seller_name: getVal('f_seller_name'), seller_nat: getVal('f_seller_nat'),
+    seller_id: getVal('f_seller_id'), seller_id_date: getVal('f_seller_id_date'),
+    seller_id_src: getVal('f_seller_id_src'), seller_mobile: getVal('f_seller_mobile'),
+    car_type: getVal('f_car_type'), car_model: getVal('f_car_model'),
+    car_color: getVal('f_car_color'), car_plate: getVal('f_car_plate'),
+    car_chassis: getVal('f_car_chassis'),
+    price_num: getVal('f_price_num'), price_text: getPriceText(),
+    buyer_name: getVal('f_buyer_name'), buyer_nat: getVal('f_buyer_nat'),
+    buyer_id: getVal('f_buyer_id'), buyer_id_date: getVal('f_buyer_id_date'),
+    buyer_id_src: getVal('f_buyer_id_src'), buyer_mobile: getVal('f_buyer_mobile'),
+    purpose: [
+      document.getElementById('ch1').checked ? 'السكراب وإسقاط اللوحات' : '',
+      document.getElementById('ch2').checked ? 'الإصلاح ونقل الملكية' : '',
+      document.getElementById('ch3').checked ? 'التشليح وإسقاط اللوحات' : ''
+    ].filter(Boolean).join(' / '),
+    w1_name: getVal('f_w1_name'), w1_mobile: getVal('f_w1_mobile'),
+    w2_name: getVal('f_w2_name'), w2_mobile: getVal('f_w2_mobile'),
+  };
+}
+
+function savePDF() {
+  const d = getFormData();
+  if (!d.seller_name || !d.car_type) { showToast('⚠️ يرجى تعبئة اسم المُقِر ونوع السيارة'); return; }
+  const w = window.open('','_blank');
+  w.document.write(buildPrintHTML(d));
+  w.document.close();
+  w.onload = () => { w.print(); showToast('✅ نافذة الطباعة جاهزة — اختر "حفظ كـ PDF"'); };
+}
+
+function buildPrintHTML(d) {
+  return `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+body{font-family:'Cairo',sans-serif;font-size:12px;margin:12mm 14mm 10mm;color:#000;direction:rtl}
+.hdr{text-align:center;border-bottom:3px solid #1a1a2e;padding-bottom:8px;margin-bottom:8px;line-height:1.7}
+.gold-bar{background:#c9a84c;color:#1a1a2e;text-align:center;font-size:17px;font-weight:900;padding:7px;margin:6px 0 3px}
+.sub{text-align:center;font-size:11px;color:#666;margin-bottom:8px}
+.sec{border:1px solid #ccc;border-radius:4px;padding:7px 10px;margin-bottom:8px}
+.sec-title{font-weight:900;font-size:11px;color:#1a1a2e;margin-bottom:5px;border-bottom:1px solid #eee;padding-bottom:3px}
+.row{display:flex;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.f{display:flex;gap:3px;align-items:baseline;flex:1}
+.l{font-weight:700;font-size:11px;white-space:nowrap}
+.v{border-bottom:1px solid #999;flex:1;min-width:50px;font-size:11px;padding-bottom:1px}
+.v-green{background:#eafaf1;border:1px solid #a3d9b1;border-radius:3px;padding:2px 8px;font-size:11px;color:#155724;font-weight:700}
+.notice{font-size:10px;background:#faf9f4;border:1px solid #ddd;border-right:3px solid #c9a84c;padding:6px 10px;margin:6px 0;line-height:1.9}
+.sigs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.sig-box{border:1px solid #ccc;padding:7px;text-align:center;border-radius:4px}
+.sig-line{height:30px;border-bottom:1px solid #ccc;margin:5px 0}
+@media print{body{margin:8mm}}
+</style></head><body>
+<div class="hdr"><strong style="font-size:15px">مؤسسة عائل عبدالله الصميل التجارية</strong><br>
+لتأجير الونشات وسحب السيارات — جدة<br>
+<span style="font-size:10px">س.ت: 4030109150 | رقم العضوية: 52664</span><br>
+<span style="font-size:10px;direction:ltr;display:inline-block">0558335503 · 0506691922 · 0503503443 · 0536500036</span></div>
+<div class="gold-bar">إقرار تنازل عن سيارة</div>
+<div class="sub">بيع ورش — متوسط في السيارات التالفة</div>
+<div class="sec"><div class="row">
+  <div class="f"><span class="l">التاريخ:</span><span class="v">${d.date}</span></div>
+  <div class="f"><span class="l">رقم السند:</span><span class="v">${d.bond_no}</span></div>
+</div></div>
+<div class="sec"><div class="sec-title">👤 بيانات المُقِر (المتنازل)</div>
+<div class="row"><div class="f"><span class="l">الاسم:</span><span class="v">${d.seller_name}</span></div><div class="f"><span class="l">الجنسية:</span><span class="v">${d.seller_nat}</span></div></div>
+<div class="row"><div class="f"><span class="l">رقم الهوية:</span><span class="v">${d.seller_id}</span></div><div class="f"><span class="l">تاريخ الإصدار:</span><span class="v">${d.seller_id_date}</span></div><div class="f"><span class="l">مصدرها:</span><span class="v">${d.seller_id_src}</span></div></div>
+<div class="row"><div class="f"><span class="l">جوال:</span><span class="v">${d.seller_mobile}</span></div></div></div>
+<div class="sec" style="background:#f0f6ff"><div class="sec-title">🚗 بيانات السيارة</div>
+<div class="row"><div class="f"><span class="l">النوع:</span><span class="v">${d.car_type}</span></div><div class="f"><span class="l">الموديل:</span><span class="v">${d.car_model}</span></div><div class="f"><span class="l">اللون:</span><span class="v">${d.car_color}</span></div></div>
+<div class="row"><div class="f"><span class="l">لوحة رقم:</span><span class="v">${d.car_plate}</span></div><div class="f"><span class="l">هيكل رقم:</span><span class="v">${d.car_chassis}</span></div></div>
+<div class="row"><div class="f"><span class="l">القيمة (رقم):</span><span class="v" style="direction:ltr">${d.price_num} ريال</span></div></div>
+<div class="row"><div class="f"><span class="l">القيمة (كتابة):</span><span class="v-green">${d.price_text||'—'}</span></div></div></div>
+<div class="sec"><div class="sec-title">👤 بيانات المتنازل إليه</div>
+<div class="row"><div class="f"><span class="l">الاسم:</span><span class="v">${d.buyer_name}</span></div><div class="f"><span class="l">الجنسية:</span><span class="v">${d.buyer_nat}</span></div></div>
+<div class="row"><div class="f"><span class="l">رقم الهوية:</span><span class="v">${d.buyer_id}</span></div><div class="f"><span class="l">تاريخ الإصدار:</span><span class="v">${d.buyer_id_date}</span></div><div class="f"><span class="l">مصدرها:</span><span class="v">${d.buyer_id_src}</span></div></div>
+<div class="row"><div class="f"><span class="l">جوال:</span><span class="v">${d.buyer_mobile}</span></div></div></div>
+<div class="sec"><div class="sec-title">🎯 غرض البيع</div>${d.purpose||'—'}</div>
+<div class="notice">في حال بيع السيارة سكراب يتم تسليم اللوحات للمالك وهو المسؤول عن رسوم الاستمارة والمرور ويتحمل إسقاطها من مكاتب التشليح.<br>
+لا تعتبر هذه مبايعة رسمية لنقل ملكيتها لدى إدارة المرور فقط لضمان حق الطرفين.</div>
+<div class="sigs">
+<div class="sig-box"><strong>توقيع المُقِر</strong><div class="sig-line"></div>الاسم: ${d.seller_name}<br>الجوال: ${d.seller_mobile}</div>
+<div class="sig-box"><strong>توقيع المتنازل إليه</strong><div class="sig-line"></div>الاسم: ${d.buyer_name}<br>الجوال: ${d.buyer_mobile}</div>
+</div></body></html>`;
+}
+
+function sendEmail() {
+  const email = getVal('f_email'); const d = getFormData();
+  if (!email) { showToast('⚠️ أدخل البريد الإلكتروني'); return; }
+  const subj = encodeURIComponent(`إقرار تنازل — ${d.car_type} ${d.car_model} — ${d.date}`);
+  const body = encodeURIComponent(`رقم السند: ${d.bond_no}\nالتاريخ: ${d.date}\nالمُقِر: ${d.seller_name} | هوية: ${d.seller_id} | جوال: ${d.seller_mobile}\nالسيارة: ${d.car_type} ${d.car_model} ${d.car_color} | لوحة: ${d.car_plate}\nالقيمة: ${d.price_num} ريال (${d.price_text})\nالمتنازل إليه: ${d.buyer_name} | هوية: ${d.buyer_id} | جوال: ${d.buyer_mobile}\nالغرض: ${d.purpose}`);
+  window.open(`mailto:${email}?subject=${subj}&body=${body}`);
+  showToast('✅ تم فتح تطبيق البريد');
+}
+
+function sendWhatsApp() {
+  const d = getFormData();
+  const wa = getVal('f_whatsapp').replace(/\D/g,'')||'966';
+  const msg = encodeURIComponent(`📋 *إقرار تنازل عن سيارة*\nمؤسسة عائل عبدالله الصميل التجارية\n\n🔢 السند: ${d.bond_no}\n📅 التاريخ: ${d.date}\n👤 المُقِر: ${d.seller_name}\n🚗 ${d.car_type} ${d.car_model} — ${d.car_color}\n🔢 اللوحة: ${d.car_plate}\n💰 ${d.price_num} ريال\n✍️ ${d.price_text}\n👤 المتنازل إليه: ${d.buyer_name}\n🎯 ${d.purpose}`);
+  window.open(`https://wa.me/${wa}?text=${msg}`);
+  showToast('✅ جاري فتح واتساب');
+}
+
+function saveToSheets() {
+  const d = getFormData();
+  if (!d.seller_name||!d.car_type) { showToast('⚠️ أكمل البيانات الأساسية'); return; }
+  const h = ['رقم السند','التاريخ','اسم المُقِر','جنسية المُقِر','هوية المُقِر','تاريخ الهوية','مصدر الهوية','جوال المُقِر','نوع السيارة','الموديل','اللون','رقم اللوحة','رقم الهيكل','قيمة البيع (رقم)','قيمة البيع (كتابة)','اسم المتنازل إليه','جنسية المتنازل إليه','هوية المتنازل إليه','تاريخ هوية المتنازل إليه','مصدر هوية المتنازل إليه','جوال المتنازل إليه','غرض البيع','الشاهد الأول','جوال الشاهد الأول','الشاهد الثاني','جوال الشاهد الثاني'];
+  const v = [d.bond_no,d.date,d.seller_name,d.seller_nat,d.seller_id,d.seller_id_date,d.seller_id_src,d.seller_mobile,d.car_type,d.car_model,d.car_color,d.car_plate,d.car_chassis,d.price_num,d.price_text,d.buyer_name,d.buyer_nat,d.buyer_id,d.buyer_id_date,d.buyer_id_src,d.buyer_mobile,d.purpose,d.w1_name,d.w1_mobile,d.w2_name,d.w2_mobile];
+  const tsv = h.join('\t')+'\n'+v.join('\t');
+  navigator.clipboard ? navigator.clipboard.writeText(tsv).then(()=>showToast('✅ تم النسخ! الصق في Google Sheets بـ Ctrl+V',5000))
+    : (()=>{const ta=document.createElement('textarea');ta.value=tsv;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('✅ تم النسخ!',5000)})();
+}
+
+function clearForm() {
+  document.querySelectorAll('input:not(.auto-field)').forEach(el=>{
+    if(el.type==='checkbox') el.checked=false;
+    else el.value='';
+  });
+  document.getElementById('f_price_text').innerHTML = 'اكتب المبلغ بالأرقام ليظهر بالحروف تلقائياً <span class="badge badge-green">تلقائي</span>';
+  showToast('✅ تم مسح النموذج');
+}
+
+// Init
+document.getElementById('f_date').valueAsDate = new Date();
+document.getElementById('f_bond_no').value = generateBondNo();
+</script>
+</body>
+</html>
