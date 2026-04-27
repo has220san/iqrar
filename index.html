@@ -745,7 +745,7 @@ function sendEmail() {
 function sendWhatsApp() {
   const d = getFormData();
   const wa = getVal('f_whatsapp').replace(/\D/g,'')||'966';
-  const msg = encodeURIComponent(`📋 *إقرار تنازل عن سيارة*\nمؤسسة عائل عبدالله الصميل التجارية\n\n🔢 السند: ${d.bond_no}\n📅 التاريخ: ${d.date}\n👤 المُقِر: ${d.seller_name}\n🚗 ${d.car_type} ${d.car_model} — ${d.car_color}\n🔢 اللوحة: ${d.car_plate}\n💰 ${d.price_num} ريال\n✍️ ${d.price_text}\n👤 المتنازل إليه: ${d.buyer_name}\n🎯 ${d.purpose}`);
+  const msg = encodeURIComponent(`📋 *إقرار تنازل عن سيارة*\nمؤسسة علي عبدالله الصميل التجارية\n\n🔢 السند: ${d.bond_no}\n📅 التاريخ: ${d.date}\n👤 المُقِر: ${d.seller_name}\n🚗 ${d.car_type} ${d.car_model} — ${d.car_color}\n🔢 اللوحة: ${d.car_plate}\n💰 ${d.price_num} ريال\n✍️ ${d.price_text}\n👤 المتنازل إليه: ${d.buyer_name}\n🎯 ${d.purpose}`);
   window.open(`https://wa.me/${wa}?text=${msg}`);
   showToast('✅ جاري فتح واتساب');
 }
