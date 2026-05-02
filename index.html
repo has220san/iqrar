@@ -1017,27 +1017,29 @@ async function saveAll() {
   const d = getData();
   showToast('⏳ جارٍ إنشاء الـ PDF...');
 
-  // 1. Save PDF first (await it)
+  // 1. Save PDF
   await savePDF(d);
 
-  // 2. Open WhatsApp
+  // 2. Save to Google Sheets
+  showToast('📊 جارٍ الحفظ في Google Sheets...');
+  const sheetOk = await saveToGoogleSheets(d);
+
+  // 3. Open WhatsApp
   showToast('📱 جارٍ فتح واتساب...');
   const msg = buildWhatsAppMsg(d);
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 
   await new Promise(r => setTimeout(r, 800));
 
-  // 3. Open Email
+  // 4. Open Email
   showToast('📧 جارٍ فتح البريد...');
   const subject = `إقرار تنازل - ${d.m_name} - ${d.date}`;
   window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildWhatsAppMsg(d))}`, '_blank');
 
   await new Promise(r => setTimeout(r, 800));
 
-  // 4. Excel / CSV
-  saveCSV(d);
-  showToast('✅ تم الحفظ بنجاح!');
-  setTimeout(hideToast, 3000);
+  showToast(sheetOk ? '✅ تم الحفظ بنجاح في كل الأماكن!' : '✅ تم — تحقق من اتصال الشيت');
+  setTimeout(hideToast, 3500);
 }
 
 function buildWhatsAppMsg(d) {
@@ -1077,19 +1079,31 @@ function buildWhatsAppMsg(d) {
 🎯 *غرض البيع:* ${d.purpose}`;
 }
 
-function saveCSV(d) {
-  const amountLine = d.amountType === 'tanazul' ? 'تنازل بدون مقابل' : d.amount_num + ' ريال';
-  const headers = ['رقم السند','التاريخ','اسم المتنازل','هوية المتنازل','جوال المتنازل',
-    'نوع السيارة','الموديل','اللون','رقم اللوحة','رقم الهيكل','القيمة',
-    'اسم المشتري','هوية المشتري','جوال المشتري','غرض البيع'];
-  const row = [d.snd, d.date, d.m_name, d.m_id, d.m_mob,
-    d.car_type, d.car_model, d.car_color, d.car_plate, d.car_vin, amountLine,
-    d.b_name, d.b_id, d.b_mob, d.purpose];
-  const csv = '\uFEFF' + headers.join(',') + '\n' + row.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(',');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=`iqrar_${d.snd}.csv`; a.click();
-  URL.revokeObjectURL(url);
+async function saveToGoogleSheets(d) {
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzKpurCjZlVEXj08gtcee-joTHMSEHbVQsV8gwAI2WOfZh5ObmG2VeKjsJxo4tsvkUH/exec';
+  const amountLine = d.amountType === 'tanazul' ? 'تنازل بدون مقابل' : `${d.amount_num} ريال (${d.amount_words})`;
+
+  const payload = {
+    snd: d.snd, date: d.date,
+    m_name: d.m_name, m_nat: d.m_nat, m_id: d.m_id, m_iddate: d.m_iddate, m_src: d.m_src, m_mob: d.m_mob,
+    car_type: d.car_type, car_model: d.car_model, car_color: d.car_color,
+    car_plate: d.car_plate, car_vin: d.car_vin, amount: amountLine,
+    b_name: d.b_name, b_nat: d.b_nat, b_id: d.b_id, b_iddate: d.b_iddate, b_src: d.b_src, b_mob: d.b_mob,
+    purpose: d.purpose
+  };
+
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    return true;
+  } catch(e) {
+    console.error('Sheets error:', e);
+    return false;
+  }
 }
 
 async function savePDF(d) {
