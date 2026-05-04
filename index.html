@@ -731,7 +731,7 @@
     <!-- ACTIONS -->
     <div class="actions-bar">
       <button class="btn-main btn-save-all" onclick="saveAll()">
-        💾 حفظ الكل — PDF · واتساب · بريد · Excel
+        💾 حفظ الكل — PDF · Drive · بريد
       </button>
       <button class="btn-main btn-clear" onclick="clearAll()">🗑 مسح</button>
     </div>
@@ -743,22 +743,22 @@
 <div id="pdfTemplate" style="
   position:fixed; left:-9999px; top:0; width:794px;
   background:white; font-family:'Cairo',sans-serif;
-  direction:rtl; padding:0; z-index:-1; font-size:13px; color:#1e2a3a;
+  direction:rtl; padding:0; z-index:-1; font-size:11px; color:#1e2a3a;
 ">
-  <div style="background:#1a3a5c;color:white;padding:18px 30px;text-align:center;">
-    <div style="font-size:17px;font-weight:900;margin-bottom:4px;">مؤسسة علي عبدالله الصميل التجارية</div>
-    <div style="font-size:11px;color:#a8c0d8;margin-bottom:2px;">لتأجير الونشات وسحب السيارات | نتوسط في بيع وشراء السيارات المصدومة والتالفة</div>
-    <div style="font-size:10px;color:#a8c0d8;">س.ت: 4030109150 · جدة · 0558335503 · 0506691922 · 0503503443</div>
+  <div style="background:#1a3a5c;color:white;padding:10px 24px;text-align:center;">
+    <div style="font-size:14px;font-weight:900;margin-bottom:2px;">مؤسسة علي عبدالله الصميل التجارية</div>
+    <div style="font-size:9.5px;color:#a8c0d8;margin-bottom:1px;">لتأجير الونشات وسحب السيارات | نتوسط في بيع وشراء السيارات المصدومة والتالفة</div>
+    <div style="font-size:9px;color:#a8c0d8;">س.ت: 4030109150 · جدة · 0558335503 · 0506691922 · 0503503443</div>
   </div>
-  <div style="text-align:center;padding:12px;border-bottom:2px solid #1a3a5c;">
-    <div style="font-size:16px;font-weight:900;color:#1a3a5c;">إقرار تنازل عن سيارة</div>
+  <div style="text-align:center;padding:6px;border-bottom:2px solid #1a3a5c;">
+    <div style="font-size:13px;font-weight:900;color:#1a3a5c;">إقرار تنازل عن سيارة</div>
   </div>
-  <div style="display:flex;justify-content:space-between;padding:10px 30px;background:#f4f6f9;border-bottom:1px solid #d0d7e2;font-size:12px;">
+  <div style="display:flex;justify-content:space-between;padding:5px 24px;background:#f4f6f9;border-bottom:1px solid #d0d7e2;font-size:10.5px;">
     <span><strong>رقم السند:</strong> <span id="pdf_snd"></span></span>
     <span><strong>التاريخ:</strong> <span id="pdf_date"></span></span>
   </div>
-  <div style="background:#1a3a5c;color:white;padding:8px 30px;font-weight:700;font-size:12px;">👤 بيانات المُقِر (المتنازل)</div>
-  <div style="padding:12px 30px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #d0d7e2;font-size:12px;">
+  <div style="background:#1a3a5c;color:white;padding:5px 24px;font-weight:700;font-size:10.5px;">👤 بيانات المُقِر (المتنازل)</div>
+  <div style="padding:6px 24px;display:grid;grid-template-columns:1fr 1fr;gap:4px;border-bottom:1px solid #d0d7e2;font-size:10.5px;">
     <div><span style="color:#6b7a8d;">الاسم: </span><strong id="pdf_m_name"></strong></div>
     <div><span style="color:#6b7a8d;">الجنسية: </span><strong id="pdf_m_nat"></strong></div>
     <div><span style="color:#6b7a8d;">رقم الهوية: </span><strong id="pdf_m_id"></strong></div>
@@ -766,19 +766,19 @@
     <div><span style="color:#6b7a8d;">مصدرها: </span><strong id="pdf_m_src"></strong></div>
     <div><span style="color:#6b7a8d;">جوال: </span><strong id="pdf_m_mob"></strong></div>
   </div>
-  <div style="background:#1a3a5c;color:white;padding:8px 30px;font-weight:700;font-size:12px;">🚗 بيانات السيارة</div>
-  <div style="padding:12px 30px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #d0d7e2;font-size:12px;">
+  <div style="background:#1a3a5c;color:white;padding:5px 24px;font-weight:700;font-size:10.5px;">🚗 بيانات السيارة</div>
+  <div style="padding:6px 24px;display:grid;grid-template-columns:1fr 1fr;gap:4px;border-bottom:1px solid #d0d7e2;font-size:10.5px;">
     <div><span style="color:#6b7a8d;">النوع: </span><strong id="pdf_car_type"></strong></div>
     <div><span style="color:#6b7a8d;">الموديل: </span><strong id="pdf_car_model"></strong></div>
     <div><span style="color:#6b7a8d;">اللون: </span><strong id="pdf_car_color"></strong></div>
     <div><span style="color:#6b7a8d;">لوحة رقم: </span><strong id="pdf_car_plate"></strong></div>
     <div style="grid-column:1/-1;"><span style="color:#6b7a8d;">هيكل رقم: </span><strong id="pdf_car_vin"></strong></div>
-    <div style="grid-column:1/-1;background:#f9f0e0;border:1px solid #c8922a;border-radius:6px;padding:8px 12px;">
+    <div style="grid-column:1/-1;background:#f9f0e0;border:1px solid #c8922a;border-radius:5px;padding:5px 10px;">
       <span style="color:#6b7a8d;">قيمة البيع: </span><strong id="pdf_amount"></strong>
     </div>
   </div>
-  <div style="background:#1a3a5c;color:white;padding:8px 30px;font-weight:700;font-size:12px;">👤 بيانات المتنازل إليه (المشتري)</div>
-  <div style="padding:12px 30px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid #d0d7e2;font-size:12px;">
+  <div style="background:#1a3a5c;color:white;padding:5px 24px;font-weight:700;font-size:10.5px;">👤 بيانات المتنازل إليه (المشتري)</div>
+  <div style="padding:6px 24px;display:grid;grid-template-columns:1fr 1fr;gap:4px;border-bottom:1px solid #d0d7e2;font-size:10.5px;">
     <div><span style="color:#6b7a8d;">الاسم: </span><strong id="pdf_b_name"></strong></div>
     <div><span style="color:#6b7a8d;">الجنسية: </span><strong id="pdf_b_nat"></strong></div>
     <div><span style="color:#6b7a8d;">رقم الهوية: </span><strong id="pdf_b_id"></strong></div>
@@ -786,37 +786,37 @@
     <div><span style="color:#6b7a8d;">مصدرها: </span><strong id="pdf_b_src"></strong></div>
     <div><span style="color:#6b7a8d;">جوال: </span><strong id="pdf_b_mob"></strong></div>
   </div>
-  <div style="background:#1a3a5c;color:white;padding:8px 30px;font-weight:700;font-size:12px;">🎯 غرض البيع</div>
-  <div style="padding:12px 30px;border-bottom:1px solid #d0d7e2;font-size:12px;">
+  <div style="background:#1a3a5c;color:white;padding:5px 24px;font-weight:700;font-size:10.5px;">🎯 غرض البيع</div>
+  <div style="padding:6px 24px;border-bottom:1px solid #d0d7e2;font-size:10.5px;">
     <strong id="pdf_purpose"></strong>
   </div>
-  <div style="margin:14px 30px;background:#fff8e8;border:1.5px solid #c8922a;border-radius:8px;padding:12px 16px;font-size:12px;font-weight:600;color:#5a3a00;line-height:1.8;">
+  <div style="margin:8px 24px;background:#fff8e8;border:1.5px solid #c8922a;border-radius:7px;padding:7px 12px;font-size:10px;font-weight:600;color:#5a3a00;line-height:1.7;">
     في حال بيع السيارة سكراب، يتم تسليم اللوحات للمالك وهو المسؤول عن رسوم الاستمارة والمرور ويتحمل إسقاطها من مكاتب التشليح.<br/>
     لا تعتبر هذه مبايعة رسمية لنقل ملكيتها لدى إدارة المرور، فقط لضمان حق الطرفين.
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:10px 30px 20px;">
-    <div style="border:1.5px solid #d0d7e2;border-radius:8px;overflow:hidden;">
-      <div style="background:#1a3a5c;color:white;padding:8px 14px;font-size:11px;font-weight:700;text-align:center;">توقيع المُقِر (المتنازل)</div>
-      <div style="padding:8px 14px;font-size:11px;color:#6b7a8d;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:6px 24px 10px;">
+    <div style="border:1.5px solid #d0d7e2;border-radius:7px;overflow:hidden;">
+      <div style="background:#1a3a5c;color:white;padding:5px 12px;font-size:10px;font-weight:700;text-align:center;">توقيع المُقِر (المتنازل)</div>
+      <div style="padding:5px 12px;font-size:10px;color:#6b7a8d;">
         الاسم: <span id="pdf_s_m_name" style="color:#1e2a3a;font-weight:600;"></span><br/>
         الجوال: <span id="pdf_s_m_mob" style="color:#1e2a3a;font-weight:600;"></span>
       </div>
-      <div style="margin:0 10px 10px;border:1.5px dashed #d0d7e2;border-radius:6px;height:80px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      <div style="margin:0 8px 8px;border:1.5px dashed #d0d7e2;border-radius:5px;height:65px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <img id="pdf_sig1" src="" style="max-width:100%;max-height:100%;display:none;" />
       </div>
     </div>
-    <div style="border:1.5px solid #d0d7e2;border-radius:8px;overflow:hidden;">
-      <div style="background:#1a3a5c;color:white;padding:8px 14px;font-size:11px;font-weight:700;text-align:center;">توقيع المتنازل إليه (المشتري)</div>
-      <div style="padding:8px 14px;font-size:11px;color:#6b7a8d;">
+    <div style="border:1.5px solid #d0d7e2;border-radius:7px;overflow:hidden;">
+      <div style="background:#1a3a5c;color:white;padding:5px 12px;font-size:10px;font-weight:700;text-align:center;">توقيع المتنازل إليه (المشتري)</div>
+      <div style="padding:5px 12px;font-size:10px;color:#6b7a8d;">
         الاسم: <span id="pdf_s_b_name" style="color:#1e2a3a;font-weight:600;"></span><br/>
         الجوال: <span id="pdf_s_b_mob" style="color:#1e2a3a;font-weight:600;"></span>
       </div>
-      <div style="margin:0 10px 10px;border:1.5px dashed #d0d7e2;border-radius:6px;height:80px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      <div style="margin:0 8px 8px;border:1.5px dashed #d0d7e2;border-radius:5px;height:65px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
         <img id="pdf_sig2" src="" style="max-width:100%;max-height:100%;display:none;" />
       </div>
     </div>
   </div>
-  <div style="background:#1a3a5c;color:#a8c0d8;text-align:center;padding:10px;font-size:10px;">
+  <div style="background:#1a3a5c;color:#a8c0d8;text-align:center;padding:7px;font-size:9px;">
     مؤسسة علي عبدالله الصميل التجارية · جدة · جميع الحقوق محفوظة
   </div>
 </div>
@@ -1015,34 +1015,28 @@ function getData() {
 
 async function saveAll() {
   const d = getData();
+
+  // 1. Generate PDF + get base64
   showToast('⏳ جارٍ إنشاء الـ PDF...');
+  const pdfBase64 = await savePDF(d, true);
 
-  // 1. Save PDF
-  await savePDF(d);
+  // 2. Send to Google Sheets + Upload PDF to Drive
+  showToast('☁️ جارٍ الرفع على Google Drive...');
+  const driveLink = await saveToGoogleSheets(d, pdfBase64);
 
-  // 2. Save to Google Sheets
-  showToast('📊 جارٍ الحفظ في Google Sheets...');
-  const sheetOk = await saveToGoogleSheets(d);
-
-  // 3. Open WhatsApp
-  showToast('📱 جارٍ فتح واتساب...');
-  const msg = buildWhatsAppMsg(d);
-  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
-
-  await new Promise(r => setTimeout(r, 800));
-
-  // 4. Open Email
+  // 3. Open Email with Drive link
   showToast('📧 جارٍ فتح البريد...');
+  const msg = buildWhatsAppMsg(d, driveLink);
   const subject = `إقرار تنازل - ${d.m_name} - ${d.date}`;
-  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildWhatsAppMsg(d))}`, '_blank');
+  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`, '_blank');
 
   await new Promise(r => setTimeout(r, 800));
 
-  showToast(sheetOk ? '✅ تم الحفظ بنجاح في كل الأماكن!' : '✅ تم — تحقق من اتصال الشيت');
+  showToast(driveLink ? '✅ تم الحفظ في Drive بنجاح!' : '✅ تم — تحقق من اتصال Drive');
   setTimeout(hideToast, 3500);
 }
 
-function buildWhatsAppMsg(d) {
+function buildWhatsAppMsg(d, driveLink) {
   const amountLine = d.amountType === 'tanazul'
     ? 'تنازل بدون مقابل مادي'
     : `${d.amount_num} ريال (${d.amount_words})`;
@@ -1076,10 +1070,11 @@ function buildWhatsAppMsg(d) {
 مصدرها: ${d.b_src}
 جوال: ${d.b_mob}
 
-🎯 *غرض البيع:* ${d.purpose}`;
+🎯 *غرض البيع:* ${d.purpose}
+${driveLink ? `\n📎 *الإقرار PDF:*\n${driveLink}` : ''}`;
 }
 
-async function saveToGoogleSheets(d) {
+async function saveToGoogleSheets(d, pdfBase64) {
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzKpurCjZlVEXj08gtcee-joTHMSEHbVQsV8gwAI2WOfZh5ObmG2VeKjsJxo4tsvkUH/exec';
   const amountLine = d.amountType === 'tanazul' ? 'تنازل بدون مقابل' : `${d.amount_num} ريال (${d.amount_words})`;
 
@@ -1089,24 +1084,25 @@ async function saveToGoogleSheets(d) {
     car_type: d.car_type, car_model: d.car_model, car_color: d.car_color,
     car_plate: d.car_plate, car_vin: d.car_vin, amount: amountLine,
     b_name: d.b_name, b_nat: d.b_nat, b_id: d.b_id, b_iddate: d.b_iddate, b_src: d.b_src, b_mob: d.b_mob,
-    purpose: d.purpose
+    purpose: d.purpose,
+    pdfBase64: pdfBase64 || ''
   };
 
   try {
-    await fetch(SHEET_URL, {
+    const resp = await fetch(SHEET_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    return true;
+    const json = await resp.json();
+    return json.pdfLink || '';
   } catch(e) {
     console.error('Sheets error:', e);
-    return false;
+    return '';
   }
 }
 
-async function savePDF(d) {
+async function savePDF(d, returnBase64 = false) {
   // Fill the hidden Arabic template
   const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val || '—'; };
   set('pdf_snd',      d.snd);
@@ -1137,7 +1133,6 @@ async function savePDF(d) {
   set('pdf_s_b_name', d.s_b_name);
   set('pdf_s_b_mob',  d.s_b_mob);
 
-  // Signatures
   const si1 = document.getElementById('pdf_sig1');
   const si2 = document.getElementById('pdf_sig2');
   if (sigData[1]) { si1.src = sigData[1]; si1.style.display = 'block'; }
@@ -1145,7 +1140,6 @@ async function savePDF(d) {
   if (sigData[2]) { si2.src = sigData[2]; si2.style.display = 'block'; }
   else { si2.style.display = 'none'; }
 
-  // Make visible temporarily for rendering
   const tmpl = document.getElementById('pdfTemplate');
   tmpl.style.left = '-9999px';
   tmpl.style.position = 'absolute';
@@ -1164,31 +1158,27 @@ async function savePDF(d) {
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pdfW = pdf.internal.pageSize.getWidth();
-    const pdfH = (canvas.height * pdfW) / canvas.width;
+    const pdfW = pdf.internal.pageSize.getWidth();   // 210mm
+    const pdfH = pdf.internal.pageSize.getHeight();  // 297mm
 
-    // If content > one page, split
-    const pageH = pdf.internal.pageSize.getHeight();
-    if (pdfH <= pageH) {
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+    // Always fit to one page — scale image to fill exactly one A4
+    pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+
+    if (returnBase64) {
+      // Return base64 string (strip the data:application/pdf;base64, prefix)
+      const b64 = pdf.output('datauristring').split(',')[1];
+      // Also trigger download
+      pdf.save(`iqrar_${d.snd}_${d.date}.pdf`);
+      return b64;
     } else {
-      let yPos = 0;
-      let remaining = pdfH;
-      let page = 0;
-      while (remaining > 0) {
-        if (page > 0) pdf.addPage();
-        const sliceH = Math.min(pageH, remaining);
-        pdf.addImage(imgData, 'JPEG', 0, -page * pageH, pdfW, pdfH);
-        remaining -= sliceH;
-        yPos += sliceH;
-        page++;
-      }
+      pdf.save(`iqrar_${d.snd}_${d.date}.pdf`);
+      return null;
     }
 
-    pdf.save(`iqrar_${d.snd}_${d.date}.pdf`);
   } catch(e) {
     console.error('PDF error:', e);
     alert('حدث خطأ في إنشاء الـ PDF');
+    return null;
   } finally {
     tmpl.style.left = '-9999px';
   }
