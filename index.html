@@ -534,6 +534,10 @@
             <label>رقم السند</label>
             <input type="text" id="f_snd" readonly placeholder="تلقائي" />
           </div>
+          <div class="form-group full">
+            <label>📧 بريدك الإلكتروني (سيُرسَل الإقرار إليه)</label>
+            <input type="email" id="f_operator_email" placeholder="example@gmail.com" style="direction:ltr;" />
+          </div>
         </div>
       </div>
     </div>
@@ -731,7 +735,7 @@
     <!-- ACTIONS -->
     <div class="actions-bar">
       <button class="btn-main btn-save-all" onclick="saveAll()">
-        💾 حفظ الكل — PDF · Drive · بريد
+        💾 حفظ الكل — PDF · Drive · Sheets · بريد
       </button>
       <button class="btn-main btn-clear" onclick="clearAll()">🗑 مسح</button>
     </div>
@@ -1010,29 +1014,29 @@ function getData() {
     s_m_mob:  document.getElementById('s_m_mob').value,
     s_b_name: document.getElementById('s_b_name').value,
     s_b_mob:  document.getElementById('s_b_mob').value,
+    operator_email: document.getElementById('f_operator_email').value.trim(),
   };
 }
 
 async function saveAll() {
   const d = getData();
 
+  // التحقق من البريد
+  if (!d.operator_email || !d.operator_email.includes('@')) {
+    alert('⚠️ الرجاء إدخال بريدك الإلكتروني الصحيح أولاً');
+    document.getElementById('f_operator_email').focus();
+    return;
+  }
+
   // 1. Generate PDF + get base64
   showToast('⏳ جارٍ إنشاء الـ PDF...');
   const pdfBase64 = await savePDF(d, true);
 
-  // 2. Send to Google Sheets + Upload PDF to Drive
-  showToast('☁️ جارٍ الرفع على Google Drive...');
+  // 2. Send to Google Sheets + Upload PDF to Drive + Send Email
+  showToast('☁️ جارٍ الرفع على Google Drive والإرسال...');
   const driveLink = await saveToGoogleSheets(d, pdfBase64);
 
-  // 3. Open Email with Drive link
-  showToast('📧 جارٍ فتح البريد...');
-  const msg = buildWhatsAppMsg(d, driveLink);
-  const subject = `إقرار تنازل - ${d.m_name} - ${d.date}`;
-  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`, '_blank');
-
-  await new Promise(r => setTimeout(r, 800));
-
-  showToast(driveLink ? '✅ تم الحفظ في Drive بنجاح!' : '✅ تم — تحقق من اتصال Drive');
+  showToast(driveLink ? '✅ تم الحفظ وإرسال البريد بنجاح!' : '✅ تم — تحقق من اتصال Drive');
   setTimeout(hideToast, 3500);
 }
 
@@ -1075,7 +1079,7 @@ ${driveLink ? `\n📎 *الإقرار PDF:*\n${driveLink}` : ''}`;
 }
 
 async function saveToGoogleSheets(d, pdfBase64) {
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzKpurCjZlVEXj08gtcee-joTHMSEHbVQsV8gwAI2WOfZh5ObmG2VeKjsJxo4tsvkUH/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzi1_SG6rzWBnBMEGTjaiAEn_cq-FssgwMwhG5ls7TX45fzJHumXR9srYz48N23Kbwp/exec';
   const amountLine = d.amountType === 'tanazul' ? 'تنازل بدون مقابل' : `${d.amount_num} ريال (${d.amount_words})`;
 
   const payload = {
@@ -1085,7 +1089,8 @@ async function saveToGoogleSheets(d, pdfBase64) {
     car_plate: d.car_plate, car_vin: d.car_vin, amount: amountLine,
     b_name: d.b_name, b_nat: d.b_nat, b_id: d.b_id, b_iddate: d.b_iddate, b_src: d.b_src, b_mob: d.b_mob,
     purpose: d.purpose,
-    pdfBase64: pdfBase64 || ''
+    pdfBase64: pdfBase64 || '',
+    operator_email: d.operator_email || ''
   };
 
   try {
