@@ -1079,7 +1079,7 @@ ${driveLink ? `\n📎 *الإقرار PDF:*\n${driveLink}` : ''}`;
 }
 
 async function saveToGoogleSheets(d, pdfBase64) {
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzi1_SG6rzWBnBMEGTjaiAEn_cq-FssgwMwhG5ls7TX45fzJHumXR9srYz48N23Kbwp/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzpheiqHlSQI6fS2V7r34g1n01dYdOPTqqGvE3uiJPgF-5-Ru3zVKaxlJ9TIXjkL3pu/exec';
   const amountLine = d.amountType === 'tanazul' ? 'تنازل بدون مقابل' : `${d.amount_num} ريال (${d.amount_words})`;
 
   const payload = {
@@ -1094,13 +1094,14 @@ async function saveToGoogleSheets(d, pdfBase64) {
   };
 
   try {
-    const resp = await fetch(SHEET_URL, {
+    // no-cors مطلوب مع Apps Script — السكريبت سيعمل لكن لن نستقبل الرد
+    await fetch(SHEET_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     });
-    const json = await resp.json();
-    return json.pdfLink || '';
+    return 'sent';
   } catch(e) {
     console.error('Sheets error:', e);
     return '';
