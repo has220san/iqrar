@@ -6,6 +6,15 @@
   <title>إقرار تنازل عن سيارة — مؤسسة الصميل</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    /* تحميل مبكر للخط لضمان ظهوره في PDF */
+    .font-preload {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      position: absolute; left: -9999px; top: -9999px;
+      font-size: 1px; opacity: 0;
+    }
+  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
@@ -484,6 +493,8 @@
   </style>
 </head>
 <body>
+<!-- تحميل مبكر للخط -->
+<div class="font-preload" aria-hidden="true">مؤسسة علي عبدالله الصميل التجارية إقرار تنازل سيارة</div>
 
 <!-- ===== LOGIN ===== -->
 <div id="loginScreen">
@@ -743,7 +754,7 @@
 <div id="pdfTemplate" style="
   position:fixed; left:-9999px; top:0;
   width:794px; height:1123px;
-  background:white; font-family:'Cairo',sans-serif;
+  background:white; font-family:'Noto Sans Arabic','Cairo',sans-serif;
   direction:rtl; padding:0; z-index:-1;
   display:flex; flex-direction:column;
   box-sizing:border-box;
@@ -1191,7 +1202,9 @@ async function savePDF(d, returnBase64 = false) {
   tmpl.style.left = '-9999px';
   tmpl.style.position = 'absolute';
 
-  await new Promise(r => setTimeout(r, 300));
+  // انتظر تحميل الخطوط بالكامل قبل التصوير
+  await document.fonts.ready;
+  await new Promise(r => setTimeout(r, 600));
 
   try {
     const canvas = await html2canvas(tmpl, {
