@@ -457,6 +457,18 @@
 
     .btn-clear:hover { background: #ffe0e0; }
 
+    .btn-drive {
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1.5px solid #a5d6a7;
+      text-decoration: none;
+      flex: 0;
+      padding: 14px 22px;
+      font-size: 0.88rem;
+    }
+
+    .btn-drive:hover { background: #c8e6c9; }
+
     /* ===== PROGRESS TOAST ===== */
     #progressToast {
       position: fixed;
@@ -744,6 +756,9 @@
       <button class="btn-main btn-save-all" onclick="saveAll()">
         💾 حفظ الكل — PDF · Drive · Sheets · بريد
       </button>
+      <a class="btn-main btn-drive" href="https://drive.google.com/drive/folders/1OlQPaVp1Ozltpz06iuWlVTVyM_WkVzV5" target="_blank">
+        📁 فتح مجلد Drive
+      </a>
       <button class="btn-main btn-clear" onclick="clearAll()">🗑 مسح</button>
     </div>
 
@@ -1055,15 +1070,18 @@ function getData() {
 async function saveAll() {
   const d = getData();
 
-  // 1. Generate PDF + get base64
-  showToast('⏳ جارٍ إنشاء الـ PDF...');
-  const pdfBase64 = await savePDF(d, true);
+  // 1. افتح نافذة الطباعة للمستخدم (لا تنتظرها)
+  showToast('🖨️ جارٍ تجهيز الطباعة...');
+  openPrintWindow(d);
 
-  // 2. Send to Google Sheets + Upload PDF to Drive + Send Email
-  showToast('☁️ جارٍ الرفع على Google Drive والإرسال...');
-  const driveLink = await saveToGoogleSheets(d, pdfBase64);
+  // 2. توليد base64 من القالب المخفي للـ Drive
+  showToast('☁️ جارٍ الرفع على Google Drive...');
+  const pdfBase64 = await generateBase64(d);
 
-  showToast('✅ تم الحفظ وإرسال البريد بنجاح!');
+  // 3. إرسال للـ Sheets + Drive + بريد
+  await saveToGoogleSheets(d, pdfBase64);
+
+  showToast('✅ تم الحفظ في Drive وإرسال البريد!');
   setTimeout(hideToast, 3500);
 }
 
@@ -1106,144 +1124,346 @@ ${driveLink ? `\n📎 *الإقرار PDF:*\n${driveLink}` : ''}`;
 }
 
 async function saveToGoogleSheets(d, pdfBase64) {
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzi1_SG6rzWBnBMEGTjaiAEn_cq-FssgwMwhG5ls7TX45fzJHumXR9srYz48N23Kbwp/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwbbRZWwKjYTWC9WR-uUDgBOkphYbriUoVeReGEgExfzJ9nPfUmCXhp2joLpKOWJOFz/exec';
   const amountLine = d.amountType === 'tanazul' ? 'تنازل بدون مقابل' : `${d.amount_num} ريال (${d.amount_words})`;
 
-  const payload = {
+  // ===== إرسال بيانات الشيت والبريد عبر GET (يتجاوز CORS تماماً) =====
+  const params = new URLSearchParams({
+    action: 'save',
     snd: d.snd, date: d.date,
-    m_name: d.m_name, m_nat: d.m_nat, m_id: d.m_id, m_iddate: d.m_iddate, m_src: d.m_src, m_mob: d.m_mob,
-    car_type: d.car_type, car_model: d.car_model, car_color: d.car_color,
-    car_plate: d.car_plate, car_vin: d.car_vin, amount: amountLine,
-    b_name: d.b_name, b_nat: d.b_nat, b_id: d.b_id, b_iddate: d.b_iddate, b_src: d.b_src, b_mob: d.b_mob,
-    purpose: d.purpose,
-    pdfBase64: pdfBase64 || '',
-    operator_email: d.operator_email || ''
-  };
+    m_name: d.m_name||'', m_nat: d.m_nat||'', m_id: d.m_id||'',
+    m_iddate: d.m_iddate||'', m_src: d.m_src||'', m_mob: d.m_mob||'',
+    car_type: d.car_type||'', car_model: d.car_model||'', car_color: d.car_color||'',
+    car_plate: d.car_plate||'', car_vin: d.car_vin||'', amount: amountLine,
+    b_name: d.b_name||'', b_nat: d.b_nat||'', b_id: d.b_id||'',
+    b_iddate: d.b_iddate||'', b_src: d.b_src||'', b_mob: d.b_mob||'',
+    purpose: d.purpose||'',
+    operator_email: d.operator_email||''
+  });
 
+  // طلب GET عبر img tag — يتجاوز CORS بالكامل
+  await new Promise((resolve) => {
+    const img = new Image();
+    img.onload = img.onerror = () => resolve();
+    img.src = SHEET_URL + '?' + params.toString();
+    setTimeout(resolve, 8000);
+  });
+
+  // ===== إرسال PDF منفصلاً عبر iframe =====
+  if (pdfBase64 && pdfBase64.length > 10) {
+    await sendPdfViaIframe(SHEET_URL, { snd: d.snd, date: d.date, m_name: d.m_name||'', pdfBase64 });
+  }
+
+  return 'sent';
+}
+
+function sendPdfViaIframe(url, payload) {
   return new Promise((resolve) => {
-    // إنشاء iframe مخفي لتجاوز CORS
-    const iframeName = 'submitFrame_' + Date.now();
+    const iframeName = 'pdffrm_' + Date.now();
     const iframe = document.createElement('iframe');
     iframe.name = iframeName;
     iframe.style.display = 'none';
     document.body.appendChild(iframe);
 
-    // إنشاء form مخفي يرسل للـ Apps Script
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = SHEET_URL;
+    form.action = url;
     form.target = iframeName;
     form.style.display = 'none';
 
-    // إضافة البيانات كحقل واحد JSON
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'data';
-    input.value = JSON.stringify(payload);
-    form.appendChild(input);
+    Object.entries(payload).forEach(([k, v]) => {
+      const inp = document.createElement('input');
+      inp.type = 'hidden'; inp.name = k; inp.value = v || '';
+      form.appendChild(inp);
+    });
+
+    // flag: هذا طلب PDF فقط
+    const flg = document.createElement('input');
+    flg.type = 'hidden'; flg.name = 'action'; flg.value = 'savePdf';
+    form.appendChild(flg);
 
     document.body.appendChild(form);
-
-    // انتظر تحميل الـ iframe بعد الإرسال
     iframe.onload = () => {
-      setTimeout(() => {
-        document.body.removeChild(form);
-        document.body.removeChild(iframe);
-      }, 1000);
-      resolve('sent');
+      setTimeout(() => { try { document.body.removeChild(form); document.body.removeChild(iframe); } catch(e){} }, 1000);
+      resolve();
     };
-
-    // timeout بعد 15 ثانية في حال عدم الاستجابة
-    setTimeout(() => resolve('timeout'), 15000);
-
+    setTimeout(resolve, 20000);
     form.submit();
   });
 }
 
-async function savePDF(d, returnBase64 = false) {
-  // Fill the hidden Arabic template
-  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val || '—'; };
-  set('pdf_snd',      d.snd);
-  set('pdf_date',     d.date);
-  set('pdf_m_name',   d.m_name);
-  set('pdf_m_nat',    d.m_nat);
-  set('pdf_m_id',     d.m_id);
-  set('pdf_m_iddate', d.m_iddate);
-  set('pdf_m_src',    d.m_src);
-  set('pdf_m_mob',    d.m_mob);
-  set('pdf_car_type',  d.car_type);
-  set('pdf_car_model', d.car_model);
-  set('pdf_car_color', d.car_color);
-  set('pdf_car_plate', d.car_plate);
-  set('pdf_car_vin',   d.car_vin);
-  set('pdf_amount', d.amountType === 'tanazul'
+// ===== نافذة الطباعة للمستخدم =====
+function openPrintWindow(d) {
+  const amountLine = d.amountType === 'tanazul'
     ? 'تنازل بدون مقابل مادي'
-    : `${d.amount_num} ريال (${d.amount_words})`);
-  set('pdf_b_name',   d.b_name);
-  set('pdf_b_nat',    d.b_nat);
-  set('pdf_b_id',     d.b_id);
-  set('pdf_b_iddate', d.b_iddate);
-  set('pdf_b_src',    d.b_src);
-  set('pdf_b_mob',    d.b_mob);
-  set('pdf_purpose',  d.purpose);
-  set('pdf_s_m_name', d.s_m_name);
-  set('pdf_s_m_mob',  d.s_m_mob);
-  set('pdf_s_b_name', d.s_b_name);
-  set('pdf_s_b_mob',  d.s_b_mob);
+    : `${d.amount_num} ريال (${d.amount_words})`;
+  const sig1 = sigData[1] ? `<img src="${sigData[1]}" style="max-width:100%;max-height:75px;"/>` : '';
+  const sig2 = sigData[2] ? `<img src="${sigData[2]}" style="max-width:100%;max-height:75px;"/>` : '';
+
+  const html = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo','Arial',sans-serif;direction:rtl;background:white;width:210mm;margin:auto;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.hdr{background:#1a3a5c;color:white;padding:14px 26px;text-align:center;}
+.hdr h1{font-size:19pt;font-weight:900;margin-bottom:3px;}
+.hdr p{font-size:8.5pt;color:#a8c0d8;margin:2px 0;}
+.ttl{text-align:center;padding:9px;border-bottom:2px solid #1a3a5c;}
+.ttl h2{font-size:15pt;font-weight:900;color:#1a3a5c;}
+.meta{display:flex;justify-content:space-between;padding:6px 26px;background:#f4f6f9;font-size:10pt;border-bottom:1px solid #d0d7e2;}
+.sh{background:#1a3a5c;color:white;padding:5px 26px;font-size:10pt;font-weight:700;}
+.sb{padding:8px 26px;display:grid;grid-template-columns:1fr 1fr;gap:5px 18px;font-size:10pt;border-bottom:1px solid #e0e6ed;background:#fafbfc;}
+.sb.w{background:#fff;}
+.sb span{color:#6b7a8d;}
+.ab{grid-column:1/-1;background:#fef9ee;border:1.5px solid #c8922a;border-radius:4px;padding:5px 10px;}
+.pb{padding:7px 26px;font-size:11pt;font-weight:700;border-bottom:1px solid #e0e6ed;}
+.dis{margin:9px 26px;background:#fff8e8;border:1.5px solid #c8922a;border-radius:6px;padding:9px 13px;font-size:8.5pt;font-weight:600;color:#5a3a00;line-height:1.8;}
+.sigs{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:9px 26px 11px;}
+.sigb{border:1.5px solid #d0d7e2;border-radius:7px;overflow:hidden;}
+.sibh{background:#1a3a5c;color:white;padding:5px 12px;font-size:9pt;font-weight:700;text-align:center;}
+.sibb{padding:5px 12px;font-size:9pt;color:#6b7a8d;line-height:1.8;}
+.sibb strong{color:#1a2a3a;}
+.sia{margin:5px 9px 9px;border:1.5px dashed #c0cad6;border-radius:5px;min-height:70px;display:flex;align-items:center;justify-content:center;}
+.ftr{background:#1a3a5c;color:#a8c0d8;text-align:center;padding:8px;font-size:8pt;margin-top:10px;}
+@media print{@page{size:A4;margin:0;}body{width:210mm;}}
+</style></head><body>
+<div class="hdr"><h1>مؤسسة علي عبدالله الصميل التجارية</h1>
+<p>لتأجير الونشات وسحب السيارات | نتوسط في بيع وشراء السيارات المصدومة والتالفة</p>
+<p>س.ت: 4030109150 · جدة · 0558335503 · 0506691922 · 0503503443</p></div>
+<div class="ttl"><h2>إقرار تنازل عن سيارة</h2></div>
+<div class="meta"><span><strong>رقم السند:</strong> ${d.snd}</span><span><strong>التاريخ:</strong> ${d.date}</span></div>
+<div class="sh">👤 بيانات المُقِر (المتنازل)</div>
+<div class="sb">
+  <div><span>الاسم: </span><strong>${d.m_name||'—'}</strong></div><div><span>الجنسية: </span><strong>${d.m_nat||'—'}</strong></div>
+  <div><span>رقم الهوية: </span><strong>${d.m_id||'—'}</strong></div><div><span>تاريخها: </span><strong>${d.m_iddate||'—'}</strong></div>
+  <div><span>مصدرها: </span><strong>${d.m_src||'—'}</strong></div><div><span>جوال: </span><strong>${d.m_mob||'—'}</strong></div>
+</div>
+<div class="sh">🚗 بيانات السيارة</div>
+<div class="sb w">
+  <div><span>النوع: </span><strong>${d.car_type||'—'}</strong></div><div><span>الموديل: </span><strong>${d.car_model||'—'}</strong></div>
+  <div><span>اللون: </span><strong>${d.car_color||'—'}</strong></div><div><span>لوحة رقم: </span><strong>${d.car_plate||'—'}</strong></div>
+  <div style="grid-column:1/-1"><span>هيكل رقم: </span><strong>${d.car_vin||'—'}</strong></div>
+  <div class="ab"><span>قيمة البيع: </span><strong style="color:#8a5f00;">${amountLine}</strong></div>
+</div>
+<div class="sh">👤 بيانات المتنازل إليه (المشتري)</div>
+<div class="sb">
+  <div><span>الاسم: </span><strong>${d.b_name||'—'}</strong></div><div><span>الجنسية: </span><strong>${d.b_nat||'—'}</strong></div>
+  <div><span>رقم الهوية: </span><strong>${d.b_id||'—'}</strong></div><div><span>تاريخها: </span><strong>${d.b_iddate||'—'}</strong></div>
+  <div><span>مصدرها: </span><strong>${d.b_src||'—'}</strong></div><div><span>جوال: </span><strong>${d.b_mob||'—'}</strong></div>
+</div>
+<div class="sh">🎯 غرض البيع</div>
+<div class="pb">${d.purpose||'—'}</div>
+<div class="dis">في حال بيع السيارة سكراب، يتم تسليم اللوحات للمالك وهو المسؤول عن رسوم الاستمارة والمرور ويتحمل إسقاطها من مكاتب التشليح.<br/>لا تعتبر هذه مبايعة رسمية لنقل ملكيتها لدى إدارة المرور، فقط لضمان حق الطرفين.</div>
+<div class="sigs">
+  <div class="sigb"><div class="sibh">توقيع المُقِر (المتنازل)</div>
+    <div class="sibb">الاسم: <strong>${d.s_m_name||'—'}</strong><br/>الجوال: <strong>${d.s_m_mob||'—'}</strong></div>
+    <div class="sia">${sig1}</div></div>
+  <div class="sigb"><div class="sibh">توقيع المتنازل إليه (المشتري)</div>
+    <div class="sibb">الاسم: <strong>${d.s_b_name||'—'}</strong><br/>الجوال: <strong>${d.s_b_mob||'—'}</strong></div>
+    <div class="sia">${sig2}</div></div>
+</div>
+<div class="ftr">مؤسسة علي عبدالله الصميل التجارية · جدة · جميع الحقوق محفوظة</div>
+<script>document.fonts.ready.then(()=>setTimeout(()=>{window.print();},700));<\/script>
+</body></html>`;
+
+  const w = window.open('', '_blank', 'width=850,height=750');
+  if (w) { w.document.write(html); w.document.close(); }
+}
+
+// ===== توليد base64 من القالب المخفي لإرساله للـ Drive =====
+async function generateBase64(d) {
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val || '—'; };
+  set('pdf_snd', d.snd); set('pdf_date', d.date);
+  set('pdf_m_name', d.m_name); set('pdf_m_nat', d.m_nat); set('pdf_m_id', d.m_id);
+  set('pdf_m_iddate', d.m_iddate); set('pdf_m_src', d.m_src); set('pdf_m_mob', d.m_mob);
+  set('pdf_car_type', d.car_type); set('pdf_car_model', d.car_model); set('pdf_car_color', d.car_color);
+  set('pdf_car_plate', d.car_plate); set('pdf_car_vin', d.car_vin);
+  set('pdf_amount', d.amountType === 'tanazul' ? 'تنازل بدون مقابل مادي' : `${d.amount_num} ريال (${d.amount_words})`);
+  set('pdf_b_name', d.b_name); set('pdf_b_nat', d.b_nat); set('pdf_b_id', d.b_id);
+  set('pdf_b_iddate', d.b_iddate); set('pdf_b_src', d.b_src); set('pdf_b_mob', d.b_mob);
+  set('pdf_purpose', d.purpose);
+  set('pdf_s_m_name', d.s_m_name); set('pdf_s_m_mob', d.s_m_mob);
+  set('pdf_s_b_name', d.s_b_name); set('pdf_s_b_mob', d.s_b_mob);
 
   const si1 = document.getElementById('pdf_sig1');
   const si2 = document.getElementById('pdf_sig2');
-  if (sigData[1]) { si1.src = sigData[1]; si1.style.display = 'block'; }
-  else { si1.style.display = 'none'; }
-  if (sigData[2]) { si2.src = sigData[2]; si2.style.display = 'block'; }
-  else { si2.style.display = 'none'; }
+  if (sigData[1]) { si1.src = sigData[1]; si1.style.display = 'block'; } else { si1.style.display = 'none'; }
+  if (sigData[2]) { si2.src = sigData[2]; si2.style.display = 'block'; } else { si2.style.display = 'none'; }
 
   const tmpl = document.getElementById('pdfTemplate');
   tmpl.style.left = '-9999px';
   tmpl.style.position = 'absolute';
 
-  // انتظر تحميل الخطوط بالكامل قبل التصوير
-  await document.fonts.ready;
-  await new Promise(r => setTimeout(r, 600));
+  await new Promise(r => setTimeout(r, 400));
 
   try {
     const canvas = await html2canvas(tmpl, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      width: 794,
-      height: 1123,
-      windowWidth: 794,
-      windowHeight: 1123
+      scale: 2, useCORS: true, backgroundColor: '#ffffff',
+      width: 794, height: 1123, windowWidth: 794, windowHeight: 1123
     });
-
-    const imgData = canvas.toDataURL('image/jpeg', 0.97);
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pdfW = pdf.internal.pageSize.getWidth();   // 210mm
-    const pdfH = pdf.internal.pageSize.getHeight();  // 297mm
-
-    // الصورة بنفس نسبة A4 تماماً — تملأ الصفحة بدون تشويه
-    pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
-
-    if (returnBase64) {
-      // Return base64 string (strip the data:application/pdf;base64, prefix)
-      const b64 = pdf.output('datauristring').split(',')[1];
-      // Also trigger download
-      pdf.save(`iqrar_${d.snd}_${d.date}.pdf`);
-      return b64;
-    } else {
-      pdf.save(`iqrar_${d.snd}_${d.date}.pdf`);
-      return null;
-    }
-
+    const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+    return pdf.output('datauristring').split(',')[1];
   } catch(e) {
-    console.error('PDF error:', e);
-    alert('حدث خطأ في إنشاء الـ PDF');
-    return null;
-  } finally {
-    tmpl.style.left = '-9999px';
+    console.error('base64 error:', e);
+    return '';
   }
+}
+
+async function savePDF(d, returnBase64 = false) {
+  // kept for compatibility — now split into openPrintWindow + generateBase64
+  openPrintWindow(d);
+  if (returnBase64) return await generateBase64(d);
+  return null;
+}
+  const amountLine = d.amountType === 'tanazul'
+    ? 'تنازل بدون مقابل مادي'
+    : `${d.amount_num} ريال (${d.amount_words})`;
+
+  // توليد توقيعات base64
+  const sig1 = sigData[1] ? `<img src="${sigData[1]}" style="max-width:100%;max-height:80px;"/>` : '';
+  const sig2 = sigData[2] ? `<img src="${sigData[2]}" style="max-width:100%;max-height:80px;"/>` : '';
+
+  const html = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'Cairo','Arial',sans-serif;
+    direction:rtl; background:white;
+    width:210mm; margin:0 auto;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .header { background:#1a3a5c; color:white; padding:16px 28px; text-align:center; }
+  .header h1 { font-size:20pt; font-weight:900; margin-bottom:4px; }
+  .header p { font-size:9pt; color:#a8c0d8; margin:2px 0; }
+  .title { text-align:center; padding:10px; border-bottom:2.5px solid #1a3a5c; }
+  .title h2 { font-size:16pt; font-weight:900; color:#1a3a5c; }
+  .meta { display:flex; justify-content:space-between; padding:7px 28px; background:#f4f6f9; font-size:10pt; border-bottom:1px solid #d0d7e2; }
+  .sec-header { background:#1a3a5c; color:white; padding:6px 28px; font-size:10.5pt; font-weight:700; }
+  .sec-body { padding:8px 28px; display:grid; grid-template-columns:1fr 1fr; gap:5px 20px; font-size:10pt; border-bottom:1px solid #e0e6ed; background:#fafbfc; }
+  .sec-body.white { background:#fff; }
+  .sec-body span { color:#6b7a8d; }
+  .sec-body strong { color:#1a2a3a; }
+  .amount-box { grid-column:1/-1; background:#fef9ee; border:1.5px solid #c8922a; border-radius:5px; padding:6px 12px; font-size:10pt; }
+  .purpose-body { padding:8px 28px; font-size:11pt; font-weight:700; border-bottom:1px solid #e0e6ed; }
+  .disclaimer { margin:10px 28px; background:#fff8e8; border:1.5px solid #c8922a; border-radius:7px; padding:10px 14px; font-size:9pt; font-weight:600; color:#5a3a00; line-height:1.8; }
+  .sigs { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:10px 28px 12px; }
+  .sig-box { border:1.5px solid #d0d7e2; border-radius:8px; overflow:hidden; }
+  .sig-box-header { background:#1a3a5c; color:white; padding:6px 12px; font-size:9.5pt; font-weight:700; text-align:center; }
+  .sig-box-body { padding:6px 12px; font-size:9pt; color:#6b7a8d; line-height:1.8; }
+  .sig-box-body strong { color:#1a2a3a; }
+  .sig-area { margin:6px 10px 10px; border:1.5px dashed #c0cad6; border-radius:5px; min-height:75px; display:flex; align-items:center; justify-content:center; }
+  .footer { background:#1a3a5c; color:#a8c0d8; text-align:center; padding:8px; font-size:8.5pt; margin-top:auto; }
+  @media print {
+    @page { size:A4; margin:0; }
+    body { width:210mm; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>مؤسسة علي عبدالله الصميل التجارية</h1>
+  <p>لتأجير الونشات وسحب السيارات &nbsp;|&nbsp; نتوسط في بيع وشراء السيارات المصدومة والتالفة</p>
+  <p>س.ت: 4030109150 &nbsp;·&nbsp; جدة &nbsp;·&nbsp; 0558335503 &nbsp;·&nbsp; 0506691922 &nbsp;·&nbsp; 0503503443</p>
+</div>
+<div class="title"><h2>إقرار تنازل عن سيارة</h2></div>
+<div class="meta">
+  <span><strong>رقم السند:</strong> ${d.snd}</span>
+  <span><strong>التاريخ:</strong> ${d.date}</span>
+</div>
+
+<div class="sec-header">👤 بيانات المُقِر (المتنازل)</div>
+<div class="sec-body">
+  <div><span>الاسم: </span><strong>${d.m_name||'—'}</strong></div>
+  <div><span>الجنسية: </span><strong>${d.m_nat||'—'}</strong></div>
+  <div><span>رقم الهوية: </span><strong>${d.m_id||'—'}</strong></div>
+  <div><span>تاريخها: </span><strong>${d.m_iddate||'—'}</strong></div>
+  <div><span>مصدرها: </span><strong>${d.m_src||'—'}</strong></div>
+  <div><span>جوال: </span><strong>${d.m_mob||'—'}</strong></div>
+</div>
+
+<div class="sec-header">🚗 بيانات السيارة</div>
+<div class="sec-body white">
+  <div><span>النوع: </span><strong>${d.car_type||'—'}</strong></div>
+  <div><span>الموديل: </span><strong>${d.car_model||'—'}</strong></div>
+  <div><span>اللون: </span><strong>${d.car_color||'—'}</strong></div>
+  <div><span>لوحة رقم: </span><strong>${d.car_plate||'—'}</strong></div>
+  <div style="grid-column:1/-1"><span>هيكل رقم: </span><strong>${d.car_vin||'—'}</strong></div>
+  <div class="amount-box"><span>قيمة البيع: </span><strong style="color:#8a5f00;">${amountLine}</strong></div>
+</div>
+
+<div class="sec-header">👤 بيانات المتنازل إليه (المشتري)</div>
+<div class="sec-body">
+  <div><span>الاسم: </span><strong>${d.b_name||'—'}</strong></div>
+  <div><span>الجنسية: </span><strong>${d.b_nat||'—'}</strong></div>
+  <div><span>رقم الهوية: </span><strong>${d.b_id||'—'}</strong></div>
+  <div><span>تاريخها: </span><strong>${d.b_iddate||'—'}</strong></div>
+  <div><span>مصدرها: </span><strong>${d.b_src||'—'}</strong></div>
+  <div><span>جوال: </span><strong>${d.b_mob||'—'}</strong></div>
+</div>
+
+<div class="sec-header">🎯 غرض البيع</div>
+<div class="purpose-body">${d.purpose||'—'}</div>
+
+<div class="disclaimer">
+  في حال بيع السيارة سكراب، يتم تسليم اللوحات للمالك وهو المسؤول عن رسوم الاستمارة والمرور ويتحمل إسقاطها من مكاتب التشليح.<br/>
+  لا تعتبر هذه مبايعة رسمية لنقل ملكيتها لدى إدارة المرور، فقط لضمان حق الطرفين.
+</div>
+
+<div class="sigs">
+  <div class="sig-box">
+    <div class="sig-box-header">توقيع المُقِر (المتنازل)</div>
+    <div class="sig-box-body">الاسم: <strong>${d.s_m_name||'—'}</strong><br/>الجوال: <strong>${d.s_m_mob||'—'}</strong></div>
+    <div class="sig-area">${sig1}</div>
+  </div>
+  <div class="sig-box">
+    <div class="sig-box-header">توقيع المتنازل إليه (المشتري)</div>
+    <div class="sig-box-body">الاسم: <strong>${d.s_b_name||'—'}</strong><br/>الجوال: <strong>${d.s_b_mob||'—'}</strong></div>
+    <div class="sig-area">${sig2}</div>
+  </div>
+</div>
+
+<div class="footer">مؤسسة علي عبدالله الصميل التجارية &nbsp;·&nbsp; جدة &nbsp;·&nbsp; جميع الحقوق محفوظة</div>
+
+<script>
+  // انتظر تحميل الخطوط ثم اطبع
+  document.fonts.ready.then(() => {
+    setTimeout(() => { window.print(); window.close(); }, 800);
+  });
+<\/script>
+</body></html>`;
+
+  // افتح نافذة الطباعة
+  const w = window.open('', '_blank', 'width=900,height=700');
+  w.document.write(html);
+  w.document.close();
+
+  // لتوليد base64 للإرسال للـ Drive، نستخدم html2canvas على النافذة الجديدة
+  // أو نُرجع string فارغ ونعتمد على الطباعة فقط
+  if (returnBase64) {
+    // انتظر قليلاً ثم حاول التقاط canvas
+    await new Promise(r => setTimeout(r, 1500));
+    try {
+      const canvas = await html2canvas(w.document.body, {
+        scale: 1.5, useCORS: true, backgroundColor: '#ffffff',
+        width: 794, windowWidth: 794
+      });
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+      return pdf.output('datauristring').split(',')[1];
+    } catch(e) {
+      console.warn('base64 capture failed, continuing without it');
+      return '';
+    }
+  }
+  return null;
 }
 
 /* ============================================================
