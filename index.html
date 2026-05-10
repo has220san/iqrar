@@ -1070,19 +1070,44 @@ function getData() {
 async function saveAll() {
   const d = getData();
 
-  // 1. افتح نافذة الطباعة للمستخدم (لا تنتظرها)
+  // 1. افتح نافذة الطباعة فوراً
   showToast('🖨️ جارٍ تجهيز الطباعة...');
   openPrintWindow(d);
 
-  // 2. توليد base64 من القالب المخفي للـ Drive
-  showToast('☁️ جارٍ الرفع على Google Drive...');
-  const pdfBase64 = await generateBase64(d);
+  // 2. أرسل للـ backend — يولّد PDF + يحفظ Drive + Sheets + بريد
+  showToast('☁️ جارٍ الحفظ في Drive و Sheets...');
+  const BACKEND = 'https://sumayil-backend.onrender.com/save';
+  const amountLine = d.amountType === 'tanazul'
+    ? 'تنازل بدون مقابل مادي'
+    : `${d.amount_num} ريال (${d.amount_words})`;
 
-  // 3. إرسال للـ Sheets + Drive + بريد
-  await saveToGoogleSheets(d, pdfBase64);
-
-  showToast('✅ تم الحفظ في Drive وإرسال البريد!');
-  setTimeout(hideToast, 3500);
+  try {
+    const resp = await fetch(BACKEND, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        snd: d.snd, date: d.date,
+        m_name: d.m_name, m_nat: d.m_nat, m_id: d.m_id,
+        m_iddate: d.m_iddate, m_src: d.m_src, m_mob: d.m_mob,
+        car_type: d.car_type, car_model: d.car_model, car_color: d.car_color,
+        car_plate: d.car_plate, car_vin: d.car_vin, amount: amountLine,
+        b_name: d.b_name, b_nat: d.b_nat, b_id: d.b_id,
+        b_iddate: d.b_iddate, b_src: d.b_src, b_mob: d.b_mob,
+        purpose: d.purpose,
+        s_m_name: d.s_m_name, s_m_mob: d.s_m_mob,
+        s_b_name: d.s_b_name, s_b_mob: d.s_b_mob,
+        operator_email: 'alialsumil@gmail.com'
+      })
+    });
+    const json = await resp.json();
+    showToast(json.status === 'ok'
+      ? '✅ تم الحفظ في Drive و Sheets وإرسال البريد!'
+      : '⚠️ تم الطباعة — تحقق من السيرفر');
+  } catch(e) {
+    console.error('Backend error:', e);
+    showToast('⚠️ تم الطباعة — تحقق من الاتصال بالسيرفر');
+  }
+  setTimeout(hideToast, 4000);
 }
 
 function buildWhatsAppMsg(d, driveLink) {
