@@ -775,6 +775,9 @@
       <button class="btn-main btn-clear" onclick="clearAll()">🗑 مسح</button>
     </div>
 
+    <!-- صندوق رابط موافقة المشتري -->
+    <div id="approvalBox" style="display:none;"></div>
+
   </div><!-- /container -->
 </div><!-- /appScreen -->
 
@@ -1086,7 +1089,8 @@ ${d.purpose === 'سكراب' ? '<div class="dis">في حال بيع السيار
     <div class="sibb">الاسم: <strong>${d.s_b_name||'—'}</strong><br/>الجوال: <strong>${d.s_b_mob||'—'}</strong></div>
     <div class="sia">${sig2}</div></div>
 </div>
-<div class="ftr">مؤسسة علي عبدالله الصميل التجارية · جدة · جميع الحقوق محفوظة</div>
+${d.buyer_approved ? `<div style="margin:10px 26px;background:#e8f5e9;border:1.5px solid #1e7e4a;border-radius:8px;padding:10px 14px;text-align:center;font-size:9pt;color:#1b5e20;font-weight:700;">✅ مُوثّق بموافقة المشتري إلكترونياً · ${d.buyer_approved_at ? new Date(d.buyer_approved_at).toLocaleString('ar-SA') : ''} · رقم المرجع: ${d.snd_id ? String(d.snd_id).slice(0,8) : ''}</div>` : ''}
+<div class="ftr">مؤسسة علي عبدالله الصميل التجارية · جدة · هذا توثيق مساعد لا يُغني عن نقل الملكية الرسمي</div>
 <script>document.fonts.ready.then(()=>setTimeout(()=>{window.print();},700));<\/script>
 </body></html>`;
 
@@ -1142,14 +1146,21 @@ async function saveAll() {
   };
 
   try {
+    let savedId = editingId;
     if (editingId) {
       showToast('☁️ جارٍ تحديث الإقرار...');
       await sbRequest('PATCH', TABLE + '?id=eq.' + editingId, record);
-      showToast('✅ تم تحديث الإقرار في الأرشيف!');
+      showToast('✅ تم تحديث الإقرار!');
     } else {
       showToast('☁️ جارٍ حفظ الإقرار...');
-      await sbRequest('POST', TABLE, record);
+      const inserted = await sbRequest('POST', TABLE, record);
+      savedId = (inserted && inserted[0]) ? inserted[0].id : null;
       showToast('✅ تم حفظ الإقرار في الأرشيف!');
+    }
+    // اعرض خيار رابط موافقة المشتري
+    if (savedId) {
+      lastSavedId = savedId;
+      showApprovalOption(savedId, d);
     }
     // افتح نافذة الطباعة
     openPrintWindow(d);
@@ -1159,6 +1170,44 @@ async function saveAll() {
   }
   btn.disabled = false;
   setTimeout(hideToast, 4000);
+}
+
+let lastSavedId = null;
+
+// ===== خيار رابط موافقة المشتري =====
+function showApprovalOption(id, d) {
+  const approveUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '') + 'approve.html?id=' + id;
+  const box = document.getElementById('approvalBox');
+  const wa = 'https://wa.me/' + normalizePhone(d.b_mob) + '?text=' + encodeURIComponent(
+    'السلام عليكم، يرجى مراجعة إقرار التنازل عن السيارة والموافقة عليه إلكترونياً عبر الرابط:\n' + approveUrl
+  );
+  box.innerHTML = `
+    <div style="background:#e8f0f8;border:1.5px solid #a8c0d8;border-radius:10px;padding:16px;margin-top:16px;">
+      <div style="font-weight:700;color:#1a3a5c;margin-bottom:10px;">📲 موافقة المشتري إلكترونياً</div>
+      <div style="font-size:0.85rem;color:#444;margin-bottom:12px;">أرسل هذا الرابط للمشتري ليطّلع على الإقرار ويوقّع ويوافق:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" id="approveLinkInput" readonly value="${approveUrl}" style="flex:1;min-width:200px;padding:9px 12px;border:1.5px solid #d0d7e2;border-radius:7px;font-size:0.8rem;direction:ltr;" />
+        <button onclick="copyApproveLink()" style="background:#1a3a5c;color:white;border:none;border-radius:7px;padding:9px 16px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;">📋 نسخ</button>
+        <a href="${wa}" target="_blank" style="background:#25d366;color:white;text-decoration:none;border-radius:7px;padding:9px 16px;font-weight:700;">واتساب</a>
+      </div>
+    </div>`;
+  box.style.display = 'block';
+}
+
+function normalizePhone(p) {
+  if (!p) return '';
+  let n = p.replace(/[^0-9]/g, '');
+  if (n.startsWith('0')) n = '966' + n.slice(1);
+  else if (!n.startsWith('966')) n = '966' + n;
+  return n;
+}
+
+function copyApproveLink() {
+  const inp = document.getElementById('approveLinkInput');
+  inp.select();
+  document.execCommand('copy');
+  showToast('📋 تم نسخ الرابط');
+  setTimeout(hideToast, 2000);
 }
 
 // ===== فتح الأرشيف =====
@@ -1227,6 +1276,9 @@ function renderArchive(rows) {
     const amount = row.amount_type === 'tanazul' ? 'تنازل بدون مقابل' : (row.amount_num || '') + ' ريال';
     const dt = row.created_at ? new Date(row.created_at).toLocaleDateString('ar-SA') : '';
     const owner = row.user_name ? '<span style="color:#3730a3;">👤 ' + row.user_name + '</span> · ' : '';
+    const approvedBadge = row.buyer_approved
+      ? '<span style="background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;border-radius:5px;padding:2px 8px;font-size:0.7rem;font-weight:700;">✅ موثّق بموافقة المشتري</span>'
+      : '<span style="background:#fff3e0;color:#8a5f00;border:1px solid #ffcc80;border-radius:5px;padding:2px 8px;font-size:0.7rem;font-weight:700;">⏳ بانتظار موافقة المشتري</span>';
     return `
     <div style="border:1.5px solid #e0e6ed;border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
       <div style="flex:1;min-width:200px;">
@@ -1235,10 +1287,12 @@ function renderArchive(rows) {
           📋 ${row.snd||'—'} · 📅 ${row.date||'—'} · 🚗 ${row.car_type||'—'} ${row.car_model||''} · 🔖 ${row.car_plate||'—'}
         </div>
         <div style="font-size:0.75rem;color:#8a5f00;margin-top:2px;">${owner}💰 ${amount} · حُفظ: ${dt}</div>
+        <div style="margin-top:6px;">${approvedBadge}</div>
       </div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button onclick="editIqrar('${row.id}')" style="background:#e8f0f8;color:#1a3a5c;border:1.5px solid #a8c0d8;border-radius:7px;padding:8px 14px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;">✏️ تعديل</button>
         <button onclick="printIqrar('${row.id}')" style="background:#e8f5e9;color:#1b5e20;border:1.5px solid #a5d6a7;border-radius:7px;padding:8px 14px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;">🖨️ طباعة</button>
+        ${!row.buyer_approved ? `<button onclick="shareApprove('${row.id}','${(row.b_mob||'').replace(/[^0-9]/g,'')}')" style="background:#eef2ff;color:#3730a3;border:1.5px solid #c7d2fe;border-radius:7px;padding:8px 14px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;">📲 رابط الموافقة</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1246,6 +1300,22 @@ function renderArchive(rows) {
 
 function filterArchive() {
   applyScopeAndRender();
+}
+
+// ===== مشاركة رابط الموافقة من الأرشيف =====
+function shareApprove(id, mob) {
+  const approveUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '') + 'approve.html?id=' + id;
+  let phone = mob || '';
+  if (phone.startsWith('0')) phone = '966' + phone.slice(1);
+  else if (phone && !phone.startsWith('966')) phone = '966' + phone;
+  const msg = 'السلام عليكم، يرجى مراجعة إقرار التنازل عن السيارة والموافقة عليه إلكترونياً عبر الرابط:\n' + approveUrl;
+  if (phone) {
+    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+  } else {
+    navigator.clipboard.writeText(approveUrl);
+    showToast('📋 تم نسخ رابط الموافقة');
+    setTimeout(hideToast, 2500);
+  }
 }
 
 // ===== تعبئة النموذج من سجل =====
@@ -1336,12 +1406,14 @@ function printIqrar(id) {
     amount: row.amount_type === 'tanazul' ? 'تنازل بدون مقابل مادي' : (row.amount_num||'') + ' ريال (' + (row.amount_words||'') + ')',
     b_name: row.b_name, b_nat: row.b_nat, b_id: row.b_id, b_iddate: row.b_iddate, b_src: row.b_src, b_mob: row.b_mob,
     purpose: row.purpose,
-    s_m_name: row.s_m_name, s_m_mob: row.s_m_mob, s_b_name: row.s_b_name, s_b_mob: row.s_b_mob
+    s_m_name: row.s_m_name, s_m_mob: row.s_m_mob, s_b_name: row.s_b_name, s_b_mob: row.s_b_mob,
+    buyer_approved: row.buyer_approved, buyer_approved_at: row.buyer_approved_at,
+    buyer_sig_approve: row.buyer_sig_approve, snd_id: row.id
   };
-  // ضع التواقيع مؤقتاً
+  // ضع التواقيع مؤقتاً — استخدم توقيع الموافقة للمشتري إن وُجد
   const oldSig1 = sigData[1], oldSig2 = sigData[2];
   sigData[1] = row.sig1 || null;
-  sigData[2] = row.sig2 || null;
+  sigData[2] = row.buyer_sig_approve || row.sig2 || null;
   openPrintWindow(d);
   sigData[1] = oldSig1; sigData[2] = oldSig2;
 }
@@ -1361,7 +1433,10 @@ function clearAll() {
   [1,2,3].forEach(i => document.getElementById('p'+i)?.classList.remove('selected'));
   clearSig(1); clearSig(2);
   editingId = null;
+  lastSavedId = null;
   document.getElementById('saveBtn').textContent = '💾 حفظ الإقرار';
+  const ab = document.getElementById('approvalBox');
+  if (ab) { ab.style.display = 'none'; ab.innerHTML = ''; }
   initAll();
 }
 </script>
