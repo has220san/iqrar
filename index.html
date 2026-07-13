@@ -1178,20 +1178,28 @@ let lastSavedId = null;
 function showApprovalOption(id, d) {
   const approveUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '') + 'approve.html?id=' + id;
   const box = document.getElementById('approvalBox');
-  const wa = 'https://wa.me/' + normalizePhone(d.b_mob) + '?text=' + encodeURIComponent(
-    'السلام عليكم، يرجى مراجعة إقرار التنازل عن السيارة والموافقة عليه إلكترونياً عبر الرابط:\n' + approveUrl
-  );
   box.innerHTML = `
     <div style="background:#e8f0f8;border:1.5px solid #a8c0d8;border-radius:10px;padding:16px;margin-top:16px;">
       <div style="font-weight:700;color:#1a3a5c;margin-bottom:10px;">📲 موافقة المشتري إلكترونياً</div>
-      <div style="font-size:0.85rem;color:#444;margin-bottom:12px;">أرسل هذا الرابط للمشتري ليطّلع على الإقرار ويوقّع ويوافق:</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="font-size:0.85rem;color:#444;margin-bottom:12px;">أرسل هذا الرابط لجوال المشتري ليطّلع على الإقرار ويوقّع ويوافق:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
         <input type="text" id="approveLinkInput" readonly value="${approveUrl}" style="flex:1;min-width:200px;padding:9px 12px;border:1.5px solid #d0d7e2;border-radius:7px;font-size:0.8rem;direction:ltr;" />
         <button onclick="copyApproveLink()" style="background:#1a3a5c;color:white;border:none;border-radius:7px;padding:9px 16px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;">📋 نسخ</button>
-        <a href="${wa}" target="_blank" style="background:#25d366;color:white;text-decoration:none;border-radius:7px;padding:9px 16px;font-weight:700;">واتساب</a>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:0.82rem;color:#6b7a8d;">جوال المشتري:</span>
+        <input type="tel" id="approvePhone" value="${d.b_mob||''}" placeholder="05xxxxxxxx" style="flex:1;min-width:130px;padding:9px 12px;border:1.5px solid #d0d7e2;border-radius:7px;font-size:0.85rem;direction:ltr;text-align:center;" />
+        <button onclick="sendApproveWhatsApp('${approveUrl}')" style="background:#25d366;color:white;border:none;border-radius:7px;padding:9px 20px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;">📱 إرسال واتساب</button>
       </div>
     </div>`;
   box.style.display = 'block';
+}
+
+function sendApproveWhatsApp(approveUrl) {
+  const phone = normalizePhone(document.getElementById('approvePhone').value);
+  if (!phone) { alert('⚠️ الرجاء إدخال جوال المشتري'); return; }
+  const msg = 'السلام عليكم، يرجى مراجعة إقرار التنازل عن السيارة والموافقة عليه إلكترونياً عبر الرابط:\n' + approveUrl;
+  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
 function normalizePhone(p) {
