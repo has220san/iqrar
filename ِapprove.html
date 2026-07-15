@@ -129,7 +129,7 @@ function showDeclaration() {
     </div>
 
     <div class="card">
-      <div class="card-title">👤 بيانات المُقِر (المتنازل)</div>
+      <div class="card-title">👤 بياناتك (المُقِر / المتنازل)</div>
       <div class="card-body">
         <div class="row"><span class="lbl">الاسم</span><span class="val">${esc(r.m_name)}</span></div>
         <div class="row"><span class="lbl">رقم الهوية</span><span class="val">${esc(r.m_id)}</span></div>
@@ -149,7 +149,7 @@ function showDeclaration() {
     </div>
 
     <div class="card">
-      <div class="card-title">👤 بياناتك (المتنازل إليه / المشتري)</div>
+      <div class="card-title">👤 بيانات المتنازل إليه (المشتري)</div>
       <div class="card-body">
         <div class="row"><span class="lbl">الاسم</span><span class="val">${esc(r.b_name)}</span></div>
         <div class="row"><span class="lbl">رقم الهوية</span><span class="val">${esc(r.b_id)}</span></div>
@@ -165,8 +165,8 @@ function showDeclaration() {
     ${disclaimer}
 
     <div class="sig-section">
-      <h3>✍️ توقيعك للموافقة</h3>
-      <p>بتوقيعك أدناه، فإنك تُقرّ بأنك اطّلعت على تفاصيل الإقرار أعلاه وتوافق عليها.</p>
+      <h3>✍️ توقيعك كمُقِر (بائع) للموافقة</h3>
+      <p>بتوقيعك أدناه، فإنك تُقرّ بأنك المُقِر (المتنازل/البائع) وقد اطّلعت على تفاصيل الإقرار أعلاه وتوافق على التنازل عن السيارة.</p>
       <div class="sig-pad" id="sigPad">
         <span class="sig-hint" id="sigHint">وقّع هنا بإصبعك ☝</span>
         <canvas id="sigCanvas"></canvas>
