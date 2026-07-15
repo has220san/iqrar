@@ -1089,7 +1089,7 @@ ${d.purpose === 'سكراب' ? '<div class="dis">في حال بيع السيار
     <div class="sibb">الاسم: <strong>${d.s_b_name||'—'}</strong><br/>الجوال: <strong>${d.s_b_mob||'—'}</strong></div>
     <div class="sia">${sig2}</div></div>
 </div>
-${d.buyer_approved ? `<div style="margin:10px 26px;background:#e8f5e9;border:1.5px solid #1e7e4a;border-radius:8px;padding:10px 14px;text-align:center;font-size:9pt;color:#1b5e20;font-weight:700;">✅ مُوثّق بموافقة المشتري إلكترونياً · ${d.buyer_approved_at ? new Date(d.buyer_approved_at).toLocaleString('ar-SA') : ''} · رقم المرجع: ${d.snd_id ? String(d.snd_id).slice(0,8) : ''}</div>` : ''}
+${d.buyer_approved ? `<div style="margin:10px 26px;background:#e8f5e9;border:1.5px solid #1e7e4a;border-radius:8px;padding:10px 14px;text-align:center;font-size:9pt;color:#1b5e20;font-weight:700;">✅ مُوثّق بموافقة المُقِر (البائع) إلكترونياً · ${d.buyer_approved_at ? new Date(d.buyer_approved_at).toLocaleString('ar-SA') : ''} · رقم المرجع: ${d.snd_id ? String(d.snd_id).slice(0,8) : ''}</div>` : ''}
 <div class="ftr">مؤسسة علي عبدالله الصميل التجارية · جدة · هذا توثيق مساعد لا يُغني عن نقل الملكية الرسمي</div>
 <script>document.fonts.ready.then(()=>setTimeout(()=>{window.print();},700));<\/script>
 </body></html>`;
@@ -1178,18 +1178,17 @@ let lastSavedId = null;
 function showApprovalOption(id, d) {
   const approveUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '') + 'approve.html?id=' + id;
   const box = document.getElementById('approvalBox');
+  const sellerPhone = normalizePhone(d.m_mob);
+  const msg = 'السلام عليكم، يرجى مراجعة إقرار التنازل عن السيارة والموافقة عليه إلكترونياً عبر الرابط:\n' + approveUrl;
+  const wa = 'https://wa.me/' + sellerPhone + '?text=' + encodeURIComponent(msg);
   box.innerHTML = `
     <div style="background:#e8f0f8;border:1.5px solid #a8c0d8;border-radius:10px;padding:16px;margin-top:16px;">
-      <div style="font-weight:700;color:#1a3a5c;margin-bottom:10px;">📲 موافقة المشتري إلكترونياً</div>
-      <div style="font-size:0.85rem;color:#444;margin-bottom:12px;">أرسل هذا الرابط لجوال المشتري ليطّلع على الإقرار ويوقّع ويوافق:</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+      <div style="font-weight:700;color:#1a3a5c;margin-bottom:10px;">📲 موافقة المُقِر (المتنازل / البائع) إلكترونياً</div>
+      <div style="font-size:0.85rem;color:#444;margin-bottom:12px;">سيُرسَل الرابط لجوال المُقِر: <strong style="color:#1a3a5c;direction:ltr;display:inline-block;">${d.m_mob||'—'}</strong></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <input type="text" id="approveLinkInput" readonly value="${approveUrl}" style="flex:1;min-width:200px;padding:9px 12px;border:1.5px solid #d0d7e2;border-radius:7px;font-size:0.8rem;direction:ltr;" />
         <button onclick="copyApproveLink()" style="background:#1a3a5c;color:white;border:none;border-radius:7px;padding:9px 16px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;">📋 نسخ</button>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <span style="font-size:0.82rem;color:#6b7a8d;">جوال المشتري:</span>
-        <input type="tel" id="approvePhone" value="${d.b_mob||''}" placeholder="05xxxxxxxx" style="flex:1;min-width:130px;padding:9px 12px;border:1.5px solid #d0d7e2;border-radius:7px;font-size:0.85rem;direction:ltr;text-align:center;" />
-        <button onclick="sendApproveWhatsApp('${approveUrl}')" style="background:#25d366;color:white;border:none;border-radius:7px;padding:9px 20px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;">📱 إرسال واتساب</button>
+        <a href="${wa}" target="_blank" style="background:#25d366;color:white;text-decoration:none;border-radius:7px;padding:9px 20px;font-weight:700;display:inline-flex;align-items:center;">📱 إرسال للمُقِر واتساب</a>
       </div>
     </div>`;
   box.style.display = 'block';
@@ -1197,7 +1196,7 @@ function showApprovalOption(id, d) {
 
 function sendApproveWhatsApp(approveUrl) {
   const phone = normalizePhone(document.getElementById('approvePhone').value);
-  if (!phone) { alert('⚠️ الرجاء إدخال جوال المشتري'); return; }
+  if (!phone) { alert('⚠️ الرجاء إدخال جوال المُقِر'); return; }
   const msg = 'السلام عليكم، يرجى مراجعة إقرار التنازل عن السيارة والموافقة عليه إلكترونياً عبر الرابط:\n' + approveUrl;
   window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
 }
@@ -1285,8 +1284,8 @@ function renderArchive(rows) {
     const dt = row.created_at ? new Date(row.created_at).toLocaleDateString('ar-SA') : '';
     const owner = row.user_name ? '<span style="color:#3730a3;">👤 ' + row.user_name + '</span> · ' : '';
     const approvedBadge = row.buyer_approved
-      ? '<span style="background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;border-radius:5px;padding:2px 8px;font-size:0.7rem;font-weight:700;">✅ موثّق بموافقة المشتري</span>'
-      : '<span style="background:#fff3e0;color:#8a5f00;border:1px solid #ffcc80;border-radius:5px;padding:2px 8px;font-size:0.7rem;font-weight:700;">⏳ بانتظار موافقة المشتري</span>';
+      ? '<span style="background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;border-radius:5px;padding:2px 8px;font-size:0.7rem;font-weight:700;">✅ موثّق بموافقة المُقِر</span>'
+      : '<span style="background:#fff3e0;color:#8a5f00;border:1px solid #ffcc80;border-radius:5px;padding:2px 8px;font-size:0.7rem;font-weight:700;">⏳ بانتظار موافقة المُقِر</span>';
     return `
     <div style="border:1.5px solid #e0e6ed;border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
       <div style="flex:1;min-width:200px;">
@@ -1300,7 +1299,7 @@ function renderArchive(rows) {
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button onclick="editIqrar('${row.id}')" style="background:#e8f0f8;color:#1a3a5c;border:1.5px solid #a8c0d8;border-radius:7px;padding:8px 14px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;">✏️ تعديل</button>
         <button onclick="printIqrar('${row.id}')" style="background:#e8f5e9;color:#1b5e20;border:1.5px solid #a5d6a7;border-radius:7px;padding:8px 14px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;">🖨️ طباعة</button>
-        ${!row.buyer_approved ? `<button onclick="shareApprove('${row.id}','${(row.b_mob||'').replace(/[^0-9]/g,'')}')" style="background:#eef2ff;color:#3730a3;border:1.5px solid #c7d2fe;border-radius:7px;padding:8px 14px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;">📲 رابط الموافقة</button>` : ''}
+        ${!row.buyer_approved ? `<button onclick="shareApprove('${row.id}','${(row.m_mob||'').replace(/[^0-9]/g,'')}')" style="background:#eef2ff;color:#3730a3;border:1.5px solid #c7d2fe;border-radius:7px;padding:8px 14px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.82rem;">📲 رابط الموافقة</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1418,10 +1417,10 @@ function printIqrar(id) {
     buyer_approved: row.buyer_approved, buyer_approved_at: row.buyer_approved_at,
     buyer_sig_approve: row.buyer_sig_approve, snd_id: row.id
   };
-  // ضع التواقيع مؤقتاً — استخدم توقيع الموافقة للمشتري إن وُجد
+  // ضع التواقيع مؤقتاً — توقيع الموافقة للمُقِر (البائع) يوضع في خانته
   const oldSig1 = sigData[1], oldSig2 = sigData[2];
-  sigData[1] = row.sig1 || null;
-  sigData[2] = row.buyer_sig_approve || row.sig2 || null;
+  sigData[1] = row.buyer_sig_approve || row.sig1 || null;
+  sigData[2] = row.sig2 || null;
   openPrintWindow(d);
   sigData[1] = oldSig1; sigData[2] = oldSig2;
 }
