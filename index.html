@@ -795,6 +795,7 @@
         <button id="tabMine" onclick="setArchiveScope('mine')" style="flex:1;padding:9px 4px;border:1.5px solid #1a3a5c;background:#1a3a5c;color:white;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.8rem;">📋 إقراراتي</button>
         <button id="tabAll" onclick="setArchiveScope('all')" style="flex:1;padding:9px 4px;border:1.5px solid #d0d7e2;background:white;color:#6b7a8d;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.8rem;">🗂️ الكل</button>
         <button id="tabApproved" onclick="setArchiveScope('approved')" style="flex:1;padding:9px 4px;border:1.5px solid #d0d7e2;background:white;color:#6b7a8d;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.8rem;">✅ المعتمدة</button>
+        <button id="tabPending" onclick="setArchiveScope('pending')" style="flex:1;padding:9px 4px;border:1.5px solid #d0d7e2;background:white;color:#6b7a8d;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-weight:700;font-size:0.8rem;">⏳ بانتظار الموافقة</button>
       </div>
       <div id="archiveList" style="max-height:56vh;overflow-y:auto;">
         <div style="text-align:center;padding:40px;color:#6b7a8d;">جارٍ التحميل...</div>
@@ -1234,7 +1235,7 @@ async function openArchive() {
 
 function setArchiveScope(scope) {
   archiveScope = scope;
-  const tabs = { mine: document.getElementById('tabMine'), all: document.getElementById('tabAll'), approved: document.getElementById('tabApproved') };
+  const tabs = { mine: document.getElementById('tabMine'), all: document.getElementById('tabAll'), approved: document.getElementById('tabApproved'), pending: document.getElementById('tabPending') };
   Object.keys(tabs).forEach(k => {
     const active = (k === scope);
     tabs[k].style.background = active ? '#1a3a5c' : 'white';
@@ -1250,6 +1251,8 @@ function applyScopeAndRender() {
     rows = archiveCache.filter(r => r.user_id === currentUser.id);
   } else if (archiveScope === 'approved') {
     rows = archiveCache.filter(r => r.buyer_approved);
+  } else if (archiveScope === 'pending') {
+    rows = archiveCache.filter(r => !r.buyer_approved);
   }
   // طبّق البحث أيضاً إن وُجد
   const q = document.getElementById('archiveSearch').value.trim().toLowerCase();
