@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المدخل الرئيسي — مؤسسة الصميل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;900&family=Tajawal:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#01009A;        /* أزرق الشعار */
+  --deep:#07073A;        /* خلفية الحقل */
+  --ink:#0B0B52;
+  --paper:#FFFFFF;
+  --wash:#ECEEF5;
+  --muted:#6D7390;
+  --line:#CCD0E0;
+  --amber:#C47A12;
+  --danger:#A32D20;
+  --danger-soft:#FDEEEC;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Tajawal',system-ui,sans-serif;
+  background:var(--wash);
+  color:var(--ink);
+  font-size:15px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,.display{font-family:'Cairo',sans-serif}
+.mono{font-family:'Roboto Mono',monospace;font-variant-numeric:tabular-nums}
+
+/* ============ شاشة الدخول ============ */
+.gate{
+  position:fixed;inset:0;z-index:40;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  background:var(--deep);
+}
+/* علامات الطريق — إشارة إلى مجال النقل، بتباين خافت جداً */
+.gate::before{
+  content:'';position:absolute;inset:0;opacity:.13;
+  background-image:repeating-linear-gradient(
+    -60deg,
+    transparent 0 34px,
+    rgba(255,255,255,.75) 34px 38px,
+    transparent 38px 76px
+  );
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 50%, transparent 30%, #000 100%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 50%, transparent 30%, #000 100%);
+}
+.gate.hidden{display:none}
+
+.gate-card{
+  position:relative;z-index:1;
+  background:var(--paper);border-radius:16px;
+  padding:34px 30px 30px;width:100%;max-width:370px;
+  box-shadow:0 24px 60px rgba(0,0,0,.42);
+  animation:rise .45s cubic-bezier(.2,.9,.3,1) both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.gate-logo{display:block;height:56px;width:auto;margin:0 auto 20px}
+.gate h1{font-size:17px;font-weight:900;text-align:center;color:var(--navy);letter-spacing:-.2px}
+.gate .eyebrow{
+  display:block;text-align:center;font-size:11px;letter-spacing:3px;
+  color:var(--muted);margin-bottom:6px;font-weight:500;
+}
+.gate .sub{font-size:12.5px;color:var(--muted);text-align:center;margin:6px 0 22px}
+
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+input{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:7px;
+  font-family:inherit;font-size:14px;background:#FBFCFE;color:var(--ink);
+}
+input:focus{
+  outline:none;border-color:var(--navy);background:#fff;
+  box-shadow:0 0 0 3px rgba(1,0,154,.13);
+}
+#pass{font-family:'Roboto Mono',monospace;letter-spacing:2px}
+.field{margin-bottom:13px}
+
+button{font-family:inherit;cursor:pointer;border:1px solid transparent}
+.btn-go{
+  width:100%;margin-top:7px;padding:13px;border-radius:8px;
+  background:var(--navy);color:#fff;font-size:15px;font-weight:700;
+  transition:background .15s;
+}
+.btn-go:hover{background:#0D0C7A}
+.btn-go:disabled{background:#9AA0B8;cursor:not-allowed}
+button:focus-visible,a:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+.err{
+  background:var(--danger-soft);color:var(--danger);border:1px solid #F2C9C4;
+  border-radius:7px;padding:9px 12px;font-size:12.5px;margin-bottom:15px;display:none;
+}
+.err.on{display:block}
+
+/* ============ الشريط العلوي ============ */
+.topbar{
+  background:var(--ink);color:#fff;padding:12px 22px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.brandwrap{display:flex;align-items:center;gap:12px}
+.logo{height:36px;width:auto;background:#fff;border-radius:5px;padding:4px 7px}
+.brandwrap b{font-family:'Cairo',sans-serif;font-size:15px;font-weight:700}
+.whoami{display:flex;align-items:center;gap:10px;font-size:12.5px;color:#A9ABD6}
+.whoami b{color:#fff;font-weight:700;font-family:'Tajawal',sans-serif}
+.whoami .role{background:#191970;border-radius:20px;padding:2px 10px;font-size:11px}
+.whoami button{
+  background:none;color:#A9ABD6;font-size:12px;text-decoration:underline;padding:0;
+}
+.whoami button:hover{color:#fff}
+
+/* ============ لوحة الاختيار ============ */
+.app{display:none;min-height:100%}
+.app.on{display:block}
+.wrap{max-width:820px;margin:0 auto;padding:38px 22px 60px}
+.eyebrow-line{
+  font-size:11px;letter-spacing:3px;color:var(--muted);font-weight:500;margin-bottom:4px;
+}
+.wrap h2{font-size:22px;font-weight:900;color:var(--navy);margin-bottom:26px}
+
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:680px){.cards{grid-template-columns:1fr}}
+
+/* البطاقة تحمل نفس "العمود الجانبي" المستخدم في لوحة رقم الفاتورة */
+.sys{
+  position:relative;display:block;text-decoration:none;color:inherit;
+  background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  padding:22px 22px 20px 22px;padding-inline-start:40px;
+  transition:transform .16s, box-shadow .16s, border-color .16s;
+}
+.sys::before{
+  content:'';position:absolute;inset-inline-start:0;top:0;bottom:0;width:22px;
+  background:var(--navy);border-radius:11px 0 0 11px;
+}
+.sys:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 28px rgba(7,7,58,.14);
+  border-color:var(--navy);
+}
+.sys .tag{
+  font-family:'Roboto Mono',monospace;font-size:10.5px;color:var(--muted);
+  letter-spacing:1px;display:block;margin-bottom:5px;
+}
+.sys h3{font-family:'Cairo',sans-serif;font-size:17px;font-weight:700;margin-bottom:6px}
+.sys p{font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:14px}
+.sys .go{font-size:13px;font-weight:700;color:var(--navy)}
+.sys .go::after{content:' ←'}
+
+.sys.amber::before{background:var(--amber)}
+.sys.amber:hover{border-color:var(--amber)}
+.sys.amber .go{color:var(--amber)}
+
+/* بطاقة تحتاج ضبطاً */
+.sys.unset{opacity:.72;cursor:default}
+.sys.unset::before{background:var(--line)}
+.sys.unset:hover{transform:none;box-shadow:none;border-color:var(--line)}
+.sys.unset .go{color:var(--danger)}
+.sys.unset .go::after{content:''}
+
+.foot{
+  margin-top:30px;padding-top:18px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--muted);line-height:1.9;
+}
+.foot .mono{font-size:11.5px}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ الدخول ============ -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <img class="gate-logo" id="gateLogo" alt="شعار مؤسسة الصميل">
+    <span class="eyebrow">المدخل الرئيسي</span>
+    <h1>مؤسسة علي عبدالله الصميل</h1>
+    <p class="sub">سجّل الدخول مرة واحدة للوصول إلى أنظمة المؤسسة</p>
+
+    <div class="err" id="err"></div>
+
+    <div class="field">
+      <label for="user">اسم المستخدم</label>
+      <input id="user" type="text" autocomplete="username" placeholder="مثال: ali"
+             onkeydown="if(event.key==='Enter')document.getElementById('pass').focus()">
+    </div>
+    <div class="field">
+      <label for="pass">كلمة المرور</label>
+      <input id="pass" type="password" autocomplete="current-password"
+             placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <button class="btn-go" id="goBtn" onclick="doLogin()">دخول</button>
+  </div>
+</div>
+
+<!-- ============ اختيار النظام ============ -->
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="brandwrap">
+      <img class="logo" id="barLogo" alt="">
+      <b>أنظمة مؤسسة الصميل</b>
+    </div>
+    <div class="whoami">
+      <b id="meName"></b><span class="role" id="meRole"></span>
+      <button onclick="doLogout()">خروج</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="eyebrow-line">الأنظمة المتاحة</div>
+    <h2>اختر النظام الذي تريد فتحه</h2>
+
+    <div class="cards">
+      <a class="sys" href="index.html" id="cardIqrar">
+        <span class="tag">IQRAR</span>
+        <h3>إقرارات التنازل</h3>
+        <p>تحرير إقرار تنازل عن سيارة، إرسال رابط التوقيع للطرف الآخر، ومتابعة الأرشيف.</p>
+        <span class="go">فتح النظام</span>
+      </a>
+
+      <a class="sys amber" id="cardInv">
+        <span class="tag">NQ</span>
+        <h3>فواتير النقليات</h3>
+        <p>إصدار فاتورة نقل بوجهاتها، طباعتها، والبحث في الفواتير السابقة.</p>
+        <span class="go" id="invGo">فتح النظام</span>
+      </a>
+    </div>
+
+    <div class="foot">
+      جلستك سارية 12 ساعة من وقت الدخول.
+      <span id="invNote"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   الإعداد الوحيد المطلوب منك:
+   ضع هنا رابط نشر نظام الفواتير من Apps Script (ينتهي بـ /exec)
+   ============================================================ */
+var INVOICE_URL = '';
+
+var AUTH_URL = 'https://bneybvopomufbrsxvgde.supabase.co';
+var AUTH_KEY = 'sb_publishable_pZG6Rhxqo48NiquYHwcVxA_MZccyJud';
+var SESSION_KEY = 'sml_session';   // نفس المفتاح المستخدم في صفحة الإقرارات
+
+var LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXwAAACnBAMAAADgR/qhAAAAElBMVEX///////7+//9oab0BAJoBAI6KIU3vAAAJaklEQVR42u1dS2/juhX+eOzOTS4wE0rBAHe6UGga3RYZ5///gC4mk1WB4sI0LxdFN2NxsulFgZBdyJZkveMXLcBnEysipY+H5y1SAkIQAfJdHQQgdrqHpRzOICRyQXJBOX4SIij4DM6AIW7g0pOYPBWHk6LvJITo2C8fzJcPFgDknW1rlp94iG9+vbm5/cVuD28/cBtOjJIZYoGYAIhIt88R20B85QAH24qb4YhNQC0gDsbBEgEy7Y2Is8o0bEbKgGgrWQHgky7+Mt7f3iUW3sJvh+qBdDuUAPCdsPCA10AibJsRcSz/aVZwK6yTovv2dxDhUSusv2OdALqd+UKwgv3pa5JuJw1qVaCehjCcSUpJatxg5hkHcuXuKij8DE4ZUQNx5OedVE46XXSnJJzsA07CSTjAYScYqMlPLm6A0uXuMQXkPhSgBDnd5fztrl7M35APQLOQwiPVxn63opdQlYmYcP9SCP+EiUyWQth9vhXuds/A65pQkb9Qsk/Zrcmw2LRHFZU+BmClI74dzvnhu9lGaHx7mzh3zaXxJM2Jw9lD/SyGmbXPj3HYwU+ZvInKfASzPIXwNspOLYrXUXvaFoZoBVaK6ZtGx0uyk1ZiuHDwOS9Cx6FdvLIwhdvVAe0+o1dZNn2y2fIzEOWn1hK+yUucH76+Z58UAEzuAMA1pFtzOAX66ra+i6L4ee7KnuwpZMiWRSzcF79rmiHBkDOfgS2Yl5fAfQLASoaENRoVFlWbNTc8O3x31OsEL1jtnXEG87rHmIlwdR5b4eChmhSKLEYI3/Q3GeCON443APdX20iAdHPOwpwFmGcdjtsH475zm/Ar1dCNAuRfPeBdetD0nNRxdeaKANgOY1n1JEd4/O3nBZGAGGh9L40IRD1DpJZ5uQSS7A2TUlXnUu1+m27z2PDYDGo7uTzZ+fmF3dyy/PkPelT8wkhMOADmXtw4hWdj2cU4ZV9n0dDajVR1l9Yv4Y0ep+qC7G+//OvDncVISWDURACNfAhXutKVrnSlK13pSle60pWudKU9U0I5avjiGCl5Q5GwlCY3LTg4GveFGty2NFGqfOSC1Tj5/eM3HMydaSf3oU7G+6El8Dr3y/jq8Ik95b/ftDsRfKc/D7404V6UxbnAtwxV4ySxFoerq2haUeLttuHHk8GfPb68p3n+kPSufMQ+BuK+gF6sjnCdQAshtfjun+lwxQrEfdLJszwcvQ4Dn7AwCyVHKzyYrSfi/pPV4xQeECHu2rZ14fDh4CzGqrrQlG9DGJ/sO4Gv5GiZjFX2LYGwHq3bok9p5PVY4cN9AyD0WOGTOEY2IYJx/ziJ0P7wZS0nawkCVL2D0+h8V8DQHFvvD18N+E8GWzWelqqriKLOyP0spaRZ8/LK1UZD5c5IZVfE5pQcNgF7wxdF/vmmMw8SN6Z/jmd5lZg8lnJoqHncni2q+JnOprrdxRaarRsKIslk0T2za1InFZ4iJb6rZaQ7FMUv9RzaPKFjkS+iOZ6HyP/01MwH7LzO/mQi0s7UPJrjZYBXOyDmyePdngXRvmF3kFn0rENO7fzRtGT5Zw7Z7KzGxhms7Rv0LBHniDh7V6N72gHCOFic9vZKqbGM6M4fMFe2ncMzMUCl7Lyf/eeJ96XZtVg/B+wfuPN2YS4DPmuzud2WgTWwXxwbPjtcO9p0JqaL4D4GGJFhJiuA5dl7Uism64JS9YFc4RgrfACw0owZvmej5n6vzp/FcB5QkBg39y3vhy8wWiLg8GfbpyTTl22JyZu+aPZ2nibDTyA+URRFZxjdFBDix/HRH9BiSDhagv/HV3PslQtMAcDMdlnbtjrCu7atTJH85QQx19sLMGkvozGO5bpF4SQeLPPDuc9PoLgkO92Zx/K5pUTr1B8CPB0Kn8xnlxx9AM5pYh11NLeWcI0WW0qt79L3qO7vZzeHzLeqm4KwD4OVl8CO8bqHCvWF6eh6H15ppUavAZsmp9i1aPuFq+PcJNealPUKT6dfG2bE6q2IJBiKDc+VVzjxH4NXcYpOLzwF7zL6HUXe+8KMZK3ovmw/gHIJ3Gngb6XO6y5jsdNR7dyrQXW7VGwQjzatWKlonBnOnPkspl2F6KyAlK3+/LVbeMznrkLLEwb49m2r4q5+vnv8cw6Uy/923gkqrSJojSMIgvZTQVu728+oM3bxQ8MaX7uLfYfwlJTFD/MfaS1rrPSrXWfghRlPU3RFEMRqVnpPF8zeV7DiQ076FN1XnQr/s8L8PR2Bf1ek2+0a3uF1K+VrOG7fDZ2fs/pQhb9zLzJ7pF62S/tOnG15SkrynkxCvnpoH+7bkhMhE9uRweezIgBMZg9jq/N4+vuW/dLEGBt8a+dKCgAk1UyMSXYyr+tp8UwScGq+8BgdfNg51gqgeeztuODrBQCPObtPI0iklw236g6nHgBYmsXsF8/7Hfce2Y3wePg0qnN+yIctQtA2MOdvU6HvGmPcLKe7xNnwRQbrp53lzR8vl8j8b2XL01EU4svL29W5u2dx2vFCWO461oPKvAxBYsCy0fdssBwwgiJE022xObPQ7eid2n4DSCjdX9R2p9n9OGHifzdt+P990+YGaP06U68PFsDDipLVayBnPXUObekVb6/dJhTh6YcBQHrOEa8DPd+bwkzaQmTXuhKUzJMABKC360kDmSgCVi3Cz9p3NyQz4dOU4leQib1NB636Ow18l7R8uIirpJX5sbeAnXEkswfrkfavezoZ96l5BwxzreVFPxMWYHf0SVCW3vSvezpZwKyxaPZZrVulH8gD8JaRwVOaBU1JEOUlwCUvUT0wZcU3uRqGtrFVs7yCd4w9ZHsmi2ZZFw/wt9ZXSlLps2lbjbXBZB8ueeF1yX9uZ35RxU1y1MIEkn3AgFfjNr4c8qg9+GogAgCXrCtfdohch+TnWQ9rSYPOnaobh0U5dIjct27mZ2190cZ+DMd9OLlSLOcoi9zKJIO6F7ZVB4QPlXxXLIo4cMci7r4/d60TKC0iKL7L5JJwwgOY5LvlkkUAdzpVfdteuAWYZz5facl/D8L97aMU/5qsbv/z3zRN09U/0x709vavfwJAtLy1v/72J4DI/SMNyX04I9c2+0ad7NvKSavFJipyic3C7ZVQQeHDKRlnr4/pBeLEy2MKxpfaER65BXPrILJTrboNzKgJTwJw36AhJgsAyxd3CfCHkphwqVLtAMJXSlbry14MWmc/yc27sQSkDBY9/B9KWwr5ylyn+gAAAABJRU5ErkJggg==';
+document.getElementById('gateLogo').src = LOGO;
+document.getElementById('barLogo').src  = LOGO;
+
+function authRpc(fn, args){
+  return fetch(AUTH_URL + '/rest/v1/rpc/' + fn, {
+    method:'POST',
+    headers:{
+      'apikey': AUTH_KEY,
+      'Authorization': 'Bearer ' + AUTH_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(args)
+  }).then(function(res){
+    if(!res.ok) throw new Error('تعذّر الاتصال بالخادم (' + res.status + ')');
+    return res.json();
+  });
+}
+
+function showErr(msg){
+  var el = document.getElementById('err');
+  el.textContent = msg;
+  el.className = 'err on';
+}
+
+function doLogin(){
+  var u = document.getElementById('user').value.trim().toLowerCase();
+  var p = document.getElementById('pass').value;
+  if(!u){ showErr('أدخل اسم المستخدم'); return; }
+  if(!p){ showErr('أدخل كلمة المرور'); return; }
+
+  var btn = document.getElementById('goBtn');
+  btn.disabled = true;
+  btn.textContent = 'جارٍ التحقق…';
+  document.getElementById('err').className = 'err';
+
+  authRpc('app_login', { p_username: u, p_password: p })
+    .then(function(r){
+      if(!r || !r.ok){
+        showErr((r && r.error) || 'بيانات الدخول غير صحيحة');
+        return;
+      }
+      try { localStorage.setItem(SESSION_KEY, r.token); } catch(e){}
+      document.getElementById('pass').value = '';
+      enter({ name:r.name, role:r.role, username:r.username });
+    })
+    .catch(function(e){ showErr(e.message || 'تعذّر تسجيل الدخول'); })
+    .then(function(){
+      btn.disabled = false;
+      btn.textContent = 'دخول';
+    });
+}
+
+function enter(user){
+  document.getElementById('meName').textContent = user.name;
+  document.getElementById('meRole').textContent = user.role;
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('app').classList.add('on');
+  setupInvoiceCard();
+}
+
+function setupInvoiceCard(){
+  var card = document.getElementById('cardInv');
+  var note = document.getElementById('invNote');
+
+  if(INVOICE_URL && INVOICE_URL.indexOf('http') === 0){
+    card.href = INVOICE_URL;
+    card.target = '_blank';
+    card.rel = 'noopener';
+    note.textContent = 'نظام الفواتير يفتح في تبويب جديد ويطلب الدخول مرة واحدة بنفس بياناتك.';
+  } else {
+    card.classList.add('unset');
+    card.removeAttribute('href');
+    document.getElementById('invGo').textContent = 'يحتاج ضبط الرابط';
+    note.innerHTML = 'لفتح نظام الفواتير: انسخ رابط النشر من Apps Script ' +
+                     '(ينتهي بـ <span class="mono">/exec</span>) وضعه في أول سطر ' +
+                     'من كود هذه الصفحة عند <span class="mono">INVOICE_URL</span>.';
+  }
+}
+
+function doLogout(){
+  var token = null;
+  try { token = localStorage.getItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY); } catch(e){}
+  if(token){ authRpc('app_logout', { p_token: token })['catch'](function(){}); }
+  location.reload();
+}
+
+/* استئناف جلسة قائمة — نفس جلسة صفحة الإقرارات */
+(function restore(){
+  var token = null;
+  try { token = localStorage.getItem(SESSION_KEY); } catch(e){}
+  if(!token){ document.getElementById('user').focus(); return; }
+
+  authRpc('app_verify', { p_token: token })
+    .then(function(r){
+      if(r && r.ok) enter({ name:r.name, role:r.role, username:r.username });
+      else {
+        try { localStorage.removeItem(SESSION_KEY); } catch(e){}
+        document.getElementById('user').focus();
+      }
+    })
+    .catch(function(){ document.getElementById('user').focus(); });
+})();
+</script>
+</body>
+</html>
