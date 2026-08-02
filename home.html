@@ -245,7 +245,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--amber);outline-offs
    الإعداد الوحيد المطلوب منك:
    ضع هنا رابط نشر نظام الفواتير من Apps Script (ينتهي بـ /exec)
    ============================================================ */
-var INVOICE_URL = 'https://script.google.com/macros/s/AKfycbwHuUyuxkfEIDWbi1XikBqwc5JyOm9jmkMC39hw91gDNqdPtd5wYgk2QVieVUqbZ9Q_/exec';
+var INVOICE_URL = '';
 
 var AUTH_URL = 'https://bneybvopomufbrsxvgde.supabase.co';
 var AUTH_KEY = 'sb_publishable_pZG6Rhxqo48NiquYHwcVxA_MZccyJud';
@@ -317,7 +317,10 @@ function setupInvoiceCard(){
   var note = document.getElementById('invNote');
 
   if(INVOICE_URL && INVOICE_URL.indexOf('http') === 0){
-    card.href = INVOICE_URL;
+    // نمرّر عنوان هذه الصفحة ليظهر زر "الرئيسية" داخل نظام الفواتير
+    var back = location.href.split('#')[0].split('?')[0];
+    card.href = INVOICE_URL + (INVOICE_URL.indexOf('?') === -1 ? '?' : '&') +
+                'home=' + encodeURIComponent(back);
     card.target = '_blank';
     card.rel = 'noopener';
     note.textContent = 'نظام الفواتير يفتح في تبويب جديد ويطلب الدخول مرة واحدة بنفس بياناتك.';
