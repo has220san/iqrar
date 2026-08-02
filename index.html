@@ -809,31 +809,69 @@
 /* ============================================================
    LOGIN — نظام المستخدمين
    ============================================================ */
-// المستخدمون المصرّح لهم — عدّل الأسماء وكلمات المرور هنا
-const USERS = {
-  'ali':    { pass: '1234', name: 'علي الصميل' },
-  'sadiq': { pass: '1234', name: 'الزميل' }
-};
+// المستخدمون محفوظون في Supabase — لا توجد كلمات مرور في هذا الملف
+const AUTH_URL = 'https://bneybvopomufbrsxvgde.supabase.co';
+const AUTH_KEY = 'sb_publishable_pZG6Rhxqo48NiquYHwcVxA_MZccyJud';
+const SESSION_KEY = 'sml_session';
 
-let currentUser = null;   // المستخدم الحالي
+let currentUser = null;   // { id, name, role }
 
-function doLogin() {
+async function authRpc(fn, args) {
+  const res = await fetch(AUTH_URL + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: {
+      'apikey': AUTH_KEY,
+      'Authorization': 'Bearer ' + AUTH_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(args)
+  });
+  if (!res.ok) throw new Error('تعذّر الاتصال بالخادم (' + res.status + ')');
+  return await res.json();
+}
+
+function loginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = '❌ ' + msg;
+  el.style.display = 'block';
+}
+
+function enterApp(user) {
+  currentUser = user;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  const badge = document.getElementById('userBadge');
+  if (badge) badge.textContent = '👤 ' + user.name + ' · ' + user.role;
+  initAll();
+}
+
+async function doLogin() {
   const u = document.getElementById('userInput').value.trim().toLowerCase();
   const v = document.getElementById('passInput').value;
-  if (USERS[u] && USERS[u].pass === v) {
-    currentUser = { id: u, name: USERS[u].name };
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appScreen').style.display = 'block';
-    // اعرض اسم المستخدم في الترويسة
-    const badge = document.getElementById('userBadge');
-    if (badge) badge.textContent = '👤 ' + currentUser.name;
-    initAll();
-  } else {
-    document.getElementById('loginError').style.display = 'block';
+  if (!u || !v) { loginError('أدخل اسم المستخدم وكلمة المرور'); return; }
+
+  const btn = document.querySelector('.login-box button');
+  const label = btn ? btn.textContent : 'دخول';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جارٍ التحقق...'; }
+  document.getElementById('loginError').style.display = 'none';
+
+  try {
+    const r = await authRpc('app_login', { p_username: u, p_password: v });
+    if (!r || !r.ok) { loginError((r && r.error) || 'بيانات الدخول غير صحيحة'); return; }
+    try { localStorage.setItem(SESSION_KEY, r.token); } catch (e) {}
+    document.getElementById('passInput').value = '';
+    enterApp({ id: r.username, name: r.name, role: r.role });
+  } catch (e) {
+    loginError(e.message || 'تعذّر تسجيل الدخول');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = label; }
   }
 }
 
-function doLogout() {
+async function doLogout() {
+  let token = null;
+  try { token = localStorage.getItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY); } catch (e) {}
+  if (token) { try { await authRpc('app_logout', { p_token: token }); } catch (e) {} }
   currentUser = null;
   document.getElementById('appScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
@@ -841,6 +879,19 @@ function doLogout() {
   document.getElementById('passInput').value = '';
   document.getElementById('loginError').style.display = 'none';
 }
+
+/* استئناف جلسة سابقة تلقائياً عند فتح الصفحة */
+async function restoreSession() {
+  let token = null;
+  try { token = localStorage.getItem(SESSION_KEY); } catch (e) {}
+  if (!token) return;
+  try {
+    const r = await authRpc('app_verify', { p_token: token });
+    if (r && r.ok) enterApp({ id: r.username, name: r.name, role: r.role });
+    else try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+  } catch (e) {}
+}
+window.addEventListener('DOMContentLoaded', restoreSession);
 
 /* ============================================================
    INIT
