@@ -162,6 +162,8 @@ function showDeclaration() {
       <div class="card-body"><strong>${esc(r.purpose)}</strong></div>
     </div>
 
+    ${(r.notes && r.notes.trim()) ? `<div class="card"><div class="card-title">📝 ملاحظات</div><div class="card-body" style="white-space:pre-wrap;">${esc(r.notes)}</div></div>` : ''}
+
     ${disclaimer}
 
     <div class="sig-section">
