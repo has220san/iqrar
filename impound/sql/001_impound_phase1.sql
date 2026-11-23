@@ -158,9 +158,11 @@ language sql immutable as $$ select v ~ '^[A-HJ-NPR-Z0-9]{17}$' $$;
 -- يتحقق من الجلسة ويعيد سجل الموظف، أو يرفع خطأ مفهوماً للواجهة
 create or replace function public.imp_me(p_token text) returns public.imp_staff
 language plpgsql security definer set search_path = public as $$
-declare v jsonb; s public.imp_staff;
+declare v jsonb; s public.imp_staff; tok uuid;
 begin
-  v := to_jsonb(public.app_verify(p_token));
+  -- رمز الجلسة في البوابة من نوع uuid؛ أي رمز غير صالح = جلسة منتهية
+  begin tok := p_token::uuid; exception when others then raise exception 'SESSION_EXPIRED'; end;
+  v := to_jsonb(public.app_verify(tok));
   if v is null or coalesce((v->>'ok')::boolean,false) is not true then
     raise exception 'SESSION_EXPIRED';
   end if;
@@ -526,5 +528,5 @@ end $$;
 -- أول مدير: ضع اسم دخولك في البوابة بدل YOUR_USERNAME ثم نفّذ السطر
 -- (بعدها يضيف المدير بقية الموظفين من شاشة «الموظفون»)
 -- =====================================================================
--- insert into public.imp_staff(username,display_name,role) values ('YOUR_USERNAME','المدير','manager')
+-- insert into public.imp_staff(username,display_name,role) values (lower('YOUR_USERNAME'),'المدير','manager')
 --   on conflict (username) do update set role='manager', active=true;
