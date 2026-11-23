@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#07073A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الإيواء">
+<title>نظام الإيواء — مؤسسة الصميل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;900&family=Tajawal:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#01009A; --deep:#07073A; --ink:#0B0B52; --paper:#FFFFFF; --wash:#ECEEF5;
+  --muted:#6D7390; --line:#CCD0E0; --amber:#C47A12; --amber-soft:#FBF1E1;
+  --danger:#A32D20; --danger-soft:#FDEEEC; --ok:#1E7A46; --ok-soft:#E6F4EC;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Tajawal',system-ui,sans-serif;background:var(--wash);color:var(--ink);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:40px}
+h1,h2,h3,.display{font-family:'Cairo',sans-serif}
+.mono{font-family:'Roboto Mono',monospace;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--navy)}
+
+.top{position:sticky;top:0;z-index:20;background:var(--deep);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.top b{font-family:'Cairo',sans-serif;font-size:16px}
+.top .sp{flex:1}
+.top .who{font-size:13px;opacity:.9}
+.top a{color:#fff;font-size:13px;opacity:.85}
+.pill{display:inline-block;border-radius:99px;padding:1px 9px;font-size:12px;font-weight:700;background:rgba(255,255,255,.14)}
+.outbox{background:var(--amber);color:#fff;border:0;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700;cursor:pointer;display:none}
+.outbox.on{display:inline-block}
+
+nav.tabs{display:flex;gap:4px;overflow-x:auto;background:var(--paper);border-bottom:1px solid var(--line);padding:0 10px;position:sticky;top:46px;z-index:19}
+nav.tabs a{padding:11px 12px;text-decoration:none;color:var(--muted);font-weight:700;font-size:14px;white-space:nowrap;border-bottom:3px solid transparent}
+nav.tabs a.on{color:var(--navy);border-color:var(--navy)}
+nav.tabs .badge{background:var(--danger);color:#fff;border-radius:99px;font-size:11px;padding:0 6px;margin-right:4px}
+
+main{max-width:980px;margin:0 auto;padding:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.card h2{font-size:17px;margin-bottom:10px}
+.card h3{font-size:15px;margin:6px 0 8px}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grow{flex:1;min-width:160px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+
+.field{margin-bottom:12px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#fff;font-size:16px}
+.field textarea{min-height:70px}
+.field .hint{font-size:12px;color:var(--muted);margin-top:3px}
+.field.bad input{border-color:var(--danger);background:var(--danger-soft)}
+.field.good input{border-color:var(--ok)}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;margin:6px 0}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer;background:var(--navy);color:#fff;font-size:15px;text-decoration:none}
+.btn.big{width:100%;padding:15px;font-size:17px}
+.btn.ghost{background:transparent;color:var(--navy);border:1px solid var(--line)}
+.btn.amber{background:var(--amber)}
+.btn.ok{background:var(--ok)}
+.btn.danger{background:var(--danger)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.stat .n{font-family:'Cairo',sans-serif;font-size:30px;font-weight:900;line-height:1.2}
+.stat .l{font-size:13px;color:var(--muted)}
+.stat.total{background:var(--deep);color:#fff;border-color:var(--deep)}
+.stat.total .l{color:#c8cbe8}
+.stat.warn{border-color:var(--amber);background:var(--amber-soft)}
+.stat.alert{border-color:var(--danger);background:var(--danger-soft)}
+
+.list{list-style:none}
+.list li{border-bottom:1px solid var(--line);padding:10px 2px;display:flex;gap:10px;align-items:center;cursor:pointer}
+.list li:last-child{border-bottom:0}
+.list .t{font-weight:700}
+.list .s{font-size:12.5px;color:var(--muted)}
+.tag{display:inline-block;border-radius:6px;padding:0 7px;font-size:12px;font-weight:700;background:var(--wash);color:var(--ink);margin-inline-start:4px}
+.tag.s1{background:var(--amber-soft);color:var(--amber)}
+.tag.s2{background:var(--ok-soft);color:var(--ok)}
+.tag.s3{background:#E7E7FB;color:var(--navy)}
+.tag.s7{background:#eee;color:#666}
+.tag.bel{background:#F3E8FD;color:#6B2BA8}
+.tag.legacy{background:#eef;color:#557}
+
+.msg{border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14px}
+.msg.err{background:var(--danger-soft);color:var(--danger)}
+.msg.warn{background:var(--amber-soft);color:#7a4a05}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}
+
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.ph{position:relative;border-radius:9px;overflow:hidden;background:#dde;aspect-ratio:4/3;cursor:pointer}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph span{position:absolute;bottom:0;inset-inline:0;background:rgba(7,7,58,.72);color:#fff;font-size:11.5px;padding:2px 6px}
+
+.step{text-align:center}
+.step .num{color:var(--muted);font-size:13px}
+.step h2{font-size:20px;margin:4px 0 12px}
+.step .preview{width:100%;max-height:52vh;object-fit:contain;border-radius:10px;background:#000;margin-bottom:12px}
+.dots{display:flex;gap:5px;justify-content:center;margin-bottom:12px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dots i.done{background:var(--ok)}
+.dots i.cur{background:var(--navy)}
+.gps{font-size:14px;padding:8px 10px;border-radius:9px;margin-bottom:10px}
+.gps.good{background:var(--ok-soft);color:var(--ok)}
+.gps.bad{background:var(--amber-soft);color:#7a4a05}
+input[type=file].hide{display:none}
+
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{font-weight:500}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}
+table.t th{color:var(--muted);font-weight:700;font-size:12.5px}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:50;display:none;align-items:center;justify-content:center;flex-direction:column;padding:10px}
+.overlay.on{display:flex}
+.overlay img{max-width:100%;max-height:88vh;border-radius:6px}
+.overlay .cap{color:#fff;margin-top:8px;font-size:13px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--deep);color:#fff;padding:10px 18px;border-radius:10px;z-index:60;font-size:14px;display:none;max-width:92vw}
+.toast.on{display:block}
+.center{text-align:center;padding:40px 10px}
+details summary{cursor:pointer;font-weight:700;margin:6px 0}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <b>نظام الإيواء</b>
+  <span class="pill" id="roleName"></span>
+  <span class="sp"></span>
+  <button class="outbox" id="outboxBtn" onclick="go('#outbox')"></button>
+  <span class="who" id="whoName"></span>
+  <a href="home.html">الرئيسية</a>
+</div>
+<nav class="tabs" id="tabs"></nav>
+<main id="view"><div class="center muted">جارٍ التحميل…</div></main>
+
+<div class="overlay" id="ov" onclick="this.classList.remove('on')"><img id="ovImg" alt=""><div class="cap" id="ovCap"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= الإعداد ================= */
+var API_URL = 'https://bneybvopomufbrsxvgde.supabase.co';
+var API_KEY = 'sb_publishable_pZG6Rhxqo48NiquYHwcVxA_MZccyJud';
+var SESSION_KEY = 'sml_session';           // نفس جلسة البوابة
+var FILES_FN = API_URL + '/functions/v1/impound-files';
+var MAX_PHOTO_BYTES = 300 * 1024;
+var GPS_MAX_M = 10;
+
+var ROLE_NAMES = {manager:'المدير',guard:'حارس الإيواء',data_entry:'مدخل البيانات',reception:'الاستقبال',accountant:'المحاسب',dhahban:'موظف ذهبان'};
+var STATUS = {1:'بانتظار المراجعة',2:'مكتملة البيانات',3:'في النقل',4:'طلب إطلاق',5:'مدفوعة',6:'إذن منتهٍ',7:'خرجت'};
+var KIND = {police_doc:'ورقة الإيواء',front:'الأمام',back:'الخلف',right:'الجانب الأيمن',left:'الجانب الأيسر',vin:'رقم الهيكل',
+            parking:'في مكانها',belongings:'مقتنيات',transfer_out:'خروج للنقل',transfer_in:'استلام بعد النقل'};
+var INTAKE_STEPS = [
+  {kind:'police_doc', title:'ورقة الإيواء الموقّعة من الشرطة', hint:'صوّر الورقة كاملة وواضحة'},
+  {kind:'front', title:'المركبة من الأمام', hint:'يجب أن تظهر اللوحة'},
+  {kind:'back',  title:'المركبة من الخلف', hint:'يجب أن تظهر اللوحة'},
+  {kind:'right', title:'الجانب الأيمن', hint:''},
+  {kind:'left',  title:'الجانب الأيسر', hint:''},
+  {kind:'vin',   title:'رقم الهيكل', hint:'قرّب الكاميرا حتى يكون الرقم مقروءاً'}
+];
+
+var ME = null, SITES = {}, token = null;
+
+/* ================= أدوات عامة ================= */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function toast(m, ms){ var t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('on');}, ms||2600); }
+function fmtDate(d){ if(!d) return '—'; var x=new Date(d); return x.toLocaleDateString('ar-SA-u-ca-gregory-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}); }
+function fmtDT(d){ if(!d) return '—'; var x=new Date(d); return x.toLocaleString('ar-SA-u-ca-gregory-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }
+function days(d){ if(!d) return ''; return Math.max(0, Math.floor((Date.now()-new Date(d))/864e5)); }
+function uuid(){ return (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0;return (c=='x'?r:(r&3|8)).toString(16);})); }
+function can(){ for(var i=0;i<arguments.length;i++) if(ME.role===arguments[i]) return true; return ME.role==='manager'; }
+function statusTag(s){ return '<span class="tag s'+s+'">'+esc(STATUS[s]||s)+'</span>'; }
+function isNetErr(e){ return e && (e.net || e.name==='TypeError'); }
+
+function friendly(msg){
+  if(/SESSION_EXPIRED/.test(msg)) return 'انتهت الجلسة. سجّل الدخول من الصفحة الرئيسية.';
+  if(/NO_ACCESS/.test(msg)) return 'ليست لك صلاحية في نظام الإيواء بعد. اطلب من المدير إضافتك.';
+  if(/NOT_ALLOWED/.test(msg)) return 'ليست لديك صلاحية لهذه العملية.';
+  return msg;
+}
+
+function rpc(fn, args){
+  return fetch(API_URL + '/rest/v1/rpc/' + fn, {
+    method:'POST',
+    headers:{'apikey':API_KEY,'Authorization':'Bearer '+API_KEY,'Content-Type':'application/json'},
+    body: JSON.stringify(Object.assign({p_token: token}, args||{}))
+  }).catch(function(e){ var x=new Error('لا يوجد اتصال بالشبكة'); x.net=true; throw x; })
+  .then(function(res){
+    return res.text().then(function(t){
+      var j=null; try{ j = t ? JSON.parse(t) : null; }catch(e){}
+      if(!res.ok){
+        var m = (j && (j.message || j.hint)) || ('خطأ من الخادم ' + res.status);
+        if(/SESSION_EXPIRED/.test(m)) showLogin();
+        var er = new Error(friendly(m)); er.code = m; throw er;
+      }
+      return j;
+    });
+  });
+}
+
+function filesFn(body){
+  return fetch(FILES_FN, {method:'POST', headers:{'Content-Type':'application/json','apikey':API_KEY},
+                          body: JSON.stringify(Object.assign({token: token}, body))})
+    .catch(function(){ var x=new Error('لا يوجد اتصال بالشبكة'); x.net=true; throw x; })
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(friendly(j.error||'تعذّر الوصول للصور')); return j; }); });
+}
+
+/* روابط عرض الصور (مؤقتة) */
+var urlCache = {};
+function loadPhotoUrls(paths){
+  var need = paths.filter(function(p){ return p && !urlCache[p]; });
+  if(!need.length) return Promise.resolve();
+  return filesFn({action:'view', paths: need}).then(function(j){ Object.assign(urlCache, j.urls||{}); });
+}
+function photoGrid(photos){
+  if(!photos.length) return '<div class="muted">لا توجد صور</div>';
+  return '<div class="photos">' + photos.map(function(p){
+    var u = p.blobUrl || urlCache[p.path] || '';
+    var cap = KIND[p.kind] + (p.note ? ' — ' + p.note : '');
+    return '<div class="ph" data-src="'+esc(u)+'" data-cap="'+esc(cap + (p.created_at? ' · '+fmtDT(p.created_at):'') + (p.taken_by? ' · '+p.taken_by:''))+'" onclick="openPh(this)">'
+         + (u ? '<img loading="lazy" src="'+esc(u)+'" alt="">' : '') + '<span>'+esc(cap)+'</span></div>';
+  }).join('') + '</div>';
+}
+function openPh(el){ var s=el.getAttribute('data-src'); if(!s) return; $('ovImg').src=s; $('ovCap').textContent=el.getAttribute('data-cap'); $('ov').classList.add('on'); }
+
+/* ================= الصور: ضغط إلى ~300KB ================= */
+function compressImage(file){
+  var load = (window.createImageBitmap
+      ? createImageBitmap(file, {imageOrientation:'from-image'}).catch(function(){ return createImageBitmap(file); })
+      : Promise.reject())
+    .catch(function(){
+      return new Promise(function(ok, bad){ var i=new Image(); i.onload=function(){ok(i);}; i.onerror=bad; i.src=URL.createObjectURL(file); });
+    });
+  return load.then(function(img){
+    var maxSide = 1600, q = 0.82;
+    function pass(){
+      var w = img.width, h = img.height, k = Math.min(1, maxSide / Math.max(w, h));
+      var c = document.createElement('canvas'); c.width = Math.round(w*k); c.height = Math.round(h*k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      return new Promise(function(ok){ c.toBlob(ok, 'image/jpeg', q); });
+    }
+    function loop(b){
+      if(b.size <= MAX_PHOTO_BYTES || (q <= 0.45 && maxSide <= 900)) return b;
+      if(q > 0.45) q -= 0.1; else maxSide = Math.round(maxSide * 0.8);
+      return pass().then(loop);
+    }
+    return pass().then(loop);
+  });
+}
+
+/* التقاط صورة من كاميرا الجوال */
+function pickPhoto(multiple){
+  return new Promise(function(resolve){
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*'; inp.className = 'hide';
+    if(multiple) inp.multiple = true; else inp.setAttribute('capture','environment');
+    inp.onchange = function(){ var f = Array.prototype.slice.call(inp.files||[]); inp.remove(); resolve(f); };
+    document.body.appendChild(inp); inp.click();
+  });
+}
+
+/* ================= GPS ================= */
+var gps = {watch:null, fix:null, err:null, subs:[]};
+function gpsStart(cb){
+  gps.subs.push(cb);
+  if(gps.watch !== null) { cb(); return; }
+  if(!navigator.geolocation){ gps.err = 'الجهاز لا يدعم تحديد الموقع'; cb(); return; }
+  gps.watch = navigator.geolocation.watchPosition(function(p){
+    gps.fix = {lat:p.coords.latitude, lng:p.coords.longitude, accuracy:Math.round(p.coords.accuracy*10)/10, at:Date.now()};
+    gps.err = null; gps.subs.forEach(function(f){ f(); });
+  }, function(e){
+    gps.err = e.code === 1 ? 'اسمح للمتصفح بالوصول إلى الموقع من إعدادات الجوال' : 'جارٍ البحث عن إشارة الموقع…';
+    gps.subs.forEach(function(f){ f(); });
+  }, {enableHighAccuracy:true, maximumAge:0, timeout:30000});
+}
+function gpsStop(){ if(gps.watch !== null && navigator.geolocation) navigator.geolocation.clearWatch(gps.watch); gps.watch=null; gps.subs=[]; gps.fix=null; }
+function gpsBox(){
+  if(gps.err && !gps.fix) return '<div class="gps bad">'+esc(gps.err)+'</div>';
+  if(!gps.fix) return '<div class="gps bad">جارٍ تحديد الموقع… قف بجانب المركبة في مكان مكشوف</div>';
+  var good = gps.fix.accuracy <= GPS_MAX_M;
+  return '<div class="gps '+(good?'good':'bad')+'">دقة الموقع الآن: <b class="mono">'+gps.fix.accuracy+' م</b> '
+       + (good ? '✓ جاهز للتصوير' : '— انتظر حتى تصل '+GPS_MAX_M+' أمتار أو أقل') + '</div>';
+}
+function gpsGood(){ return gps.fix && gps.fix.accuracy <= GPS_MAX_M && (Date.now() - gps.fix.at) < 60000; }
+
+/* ================= صندوق الانتظار (يحفظ الإيواء حتى يعود الاتصال) ================= */
+var DB = null;
+function db(){
+  if(DB) return Promise.resolve(DB);
+  return new Promise(function(ok, bad){
+    var r = indexedDB.open('impound', 1);
+    r.onupgradeneeded = function(){ r.result.createObjectStore('outbox', {keyPath:'client_ref'}); };
+    r.onsuccess = function(){ DB = r.result; ok(DB); };
+    r.onerror = function(){ bad(r.error); };
+  });
+}
+function obAll(){ return db().then(function(d){ return new Promise(function(ok){ var q=d.transaction('outbox').objectStore('outbox').getAll(); q.onsuccess=function(){ok(q.result||[]);}; q.onerror=function(){ok([]);}; }); }).catch(function(){ return []; }); }
+function obPut(it){ return db().then(function(d){ return new Promise(function(ok,bad){ var t=d.transaction('outbox','readwrite'); t.objectStore('outbox').put(it); t.oncomplete=ok; t.onerror=function(){bad(t.error);}; }); }); }
+function obDel(k){ return db().then(function(d){ return new Promise(function(ok){ var t=d.transaction('outbox','readwrite'); t.objectStore('outbox').delete(k); t.oncomplete=ok; t.onerror=ok; }); }); }
+
+var obBusy = false;
+function refreshOutboxBtn(){
+  obAll().then(function(all){
+    var b = $('outboxBtn');
+    if(all.length){ b.textContent = 'بانتظار الإرسال: ' + all.length; b.classList.add('on'); }
+    else b.classList.remove('on');
+  });
+}
+
+/* يرفع الصور ثم يسجل العملية. يُعاد بأمان: الصور المرفوعة لا تُرفع مرتين، والخادم يمنع تكرار الملف */
+function sendItem(it){
+  var pending = it.photos.filter(function(p){ return !p.path; });
+  var chain = Promise.resolve();
+  if(pending.length){
+    chain = filesFn({action:'upload', count: pending.length}).then(function(j){
+      return pending.reduce(function(pr, p, i){
+        return pr.then(function(){
+          var u = j.uploads[i];
+          return fetch(u.url, {method:'PUT', headers:{'Content-Type':'image/jpeg','x-upsert':'false'}, body:p.blob})
+            .catch(function(){ var x=new Error('لا يوجد اتصال بالشبكة'); x.net=true; throw x; })
+            .then(function(r){ if(!r.ok) throw new Error('تعذّر رفع صورة (' + r.status + ')'); p.path = u.path; return obPut(it); });
+        });
+      }, Promise.resolve());
+    });
+  }
+  return chain.then(function(){
+    if(it.newDriver && !it.data.driver_id){
+      return rpc('imp_driver_save', {p_kind:'external', p_name:it.newDriver.name, p_phone:it.newDriver.phone})
+        .then(function(d){ it.data.driver_id = d.id; return obPut(it); });
+    }
+  }).then(function(){
+    var photos = it.photos.map(function(p){ return {kind:p.kind, path:p.path, lat:p.lat, lng:p.lng, accuracy:p.accuracy, note:p.note||''}; });
+    if(it.type === 'intake') return rpc('imp_intake', {p_data: Object.assign({}, it.data, {client_ref: it.client_ref, photos: photos})});
+    if(it.type === 'belongings') return rpc('imp_add_belongings', {p_vehicle: it.data.vehicle_id, p_photos: photos});
+    if(it.type === 'transfer_send') return rpc('imp_transfer_send', {p_id: it.data.vehicle_id, p_to: it.data.to_site, p_driver: it.data.driver_id||null, p_photos: photos});
+    if(it.type === 'transfer_receive') return rpc('imp_transfer_receive', {p_movement: it.data.movement_id, p_photos: photos});
+  }).then(function(res){ return obDel(it.client_ref).then(function(){ return res; }); });
+}
+
+function processOutbox(){
+  if(obBusy || !token) return Promise.resolve();
+  obBusy = true;
+  return obAll().then(function(all){
+    return all.reduce(function(pr, it){
+      return pr.then(function(){
+        return sendItem(it).then(function(){ toast('تم إرسال عملية محفوظة: ' + (it.label||'')); })
+          .catch(function(e){ if(!isNetErr(e)){ it.error = e.message; return obPut(it); } });
+      });
+    }, Promise.resolve());
+  }).catch(function(){}).then(function(){ obBusy = false; refreshOutboxBtn(); });
+}
+window.addEventListener('online', processOutbox);
+setInterval(processOutbox, 60000);
+
+/* حفظ عملية ثم محاولة إرسالها فوراً */
+function submitOp(it, onDone){
+  it.created = Date.now();
+  return obPut(it).then(function(){
+    refreshOutboxBtn();
+    obBusy = true;
+    return sendItem(it).then(function(res){ obBusy=false; refreshOutboxBtn(); onDone(res, false); })
+      .catch(function(e){
+        obBusy=false; refreshOutboxBtn();
+        if(isNetErr(e)){ onDone(null, true); return; }
+        // خطأ تحقق من الخادم: نحذفها من الانتظار ونعرض الخطأ لتصحيحه
+        return obDel(it.client_ref).then(function(){ refreshOutboxBtn(); throw e; });
+      });
+  });
+}
+
+/* ================= التوجيه ================= */
+function go(h){ if(location.hash === h) route(); else location.hash = h; }
+window.addEventListener('hashchange', route);
+
+function tabs(){
+  var t = [['#dash','المتابعة']];
+  if(can('guard','dhahban')) t.push(['#new','إيواء جديد'], ['#incoming','قادمة إليك']);
+  if(can('data_entry')) t.push(['#review','المراجعة']);
+  t.push(['#list','المركبات'], ['#drivers','السائقون']);
+  if(can()) t.push(['#staff','الموظفون']);
+  var cur = (location.hash||'#dash').split('/')[0].split('?')[0];
+  $('tabs').innerHTML = t.map(function(x){ return '<a href="'+x[0]+'" class="'+(x[0]===cur?'on':'')+'" id="tab_'+x[0].slice(1)+'">'+x[1]+'</a>'; }).join('');
+}
+
+function route(){
+  if(!ME) return;
+  if(window._leave){ try{ window._leave(); }catch(e){} window._leave = null; }
+  tabs();
+  var h = location.hash || '#dash', p = h.split('/');
+  var V = $('view'); window.scrollTo(0,0);
+  var r = {'#dash':viewDash,'#new':viewIntake,'#incoming':viewIncoming,'#review':viewReview,'#list':viewList,
+           '#v':viewVehicle,'#drivers':viewDrivers,'#staff':viewStaff,'#outbox':viewOutbox}[p[0].split('?')[0]] || viewDash;
+  r(V, p.slice(1));
+}
+
+function fail(V, e){ V.innerHTML = '<div class="msg err">'+esc(e.message)+'</div>'; }
+
+/* ================= المتابعة ================= */
+function viewDash(V){
+  V.innerHTML = '<div class="center muted">جارٍ التحميل…</div>';
+  rpc('imp_counts').then(function(c){
+    var total = c.sites.reduce(function(a,s){ return a + s.count; }, 0);
+    var html = '<div class="stats"><a class="stat total" href="#list"><div class="n mono">'+total+'</div><div class="l">المجموع داخل الحجز</div></a>'
+      + c.sites.map(function(s){ return '<a class="stat" href="#list?site='+s.code+'"><div class="n mono">'+s.count+'</div><div class="l">'+esc(s.name)+'</div></a>'; }).join('')
+      + '</div><div class="stats">'
+      + '<a class="stat '+(c.pending_review?'warn':'')+'" href="#list?status=1"><div class="n mono">'+c.pending_review+'</div><div class="l">بانتظار المراجعة</div></a>'
+      + '<a class="stat" href="#list?status=3"><div class="n mono">'+c.in_transit+'</div><div class="l">في النقل</div></a>'
+      + (c.late_transit ? '<a class="stat alert" href="#list?status=3"><div class="n mono">'+c.late_transit+'</div><div class="l">في النقل أكثر من يوم</div></a>' : '')
+      + '<a class="stat" href="#list?old=1"><div class="n mono">'+c.old_30+'</div><div class="l">أكثر من 30 يوماً</div></a>'
+      + (c.legacy_inactive ? '<a class="stat" href="#list?site=closed"><div class="n mono">'+c.legacy_inactive+'</div><div class="l">في مواقع سابقة (لا تُحسب)</div></a>' : '')
+      + '</div>'
+      + '<div class="card"><h2>بحث شامل</h2><div class="row"><input class="grow" id="q" style="border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:16px" placeholder="رقم الإيواء أو اللوحة أو رقم الهيكل أو اسم الضابط" onkeydown="if(event.key===\'Enter\')doSearch()"><button class="btn" onclick="doSearch()">بحث</button></div><div id="res"></div></div>';
+    V.innerHTML = html;
+    var rb = $('tab_review'); if(rb && c.pending_review) rb.innerHTML += '<span class="badge mono">'+c.pending_review+'</span>';
+  }).catch(function(e){ fail(V,e); });
+}
+function doSearch(){
+  var q = $('q').value.trim(); if(!q) return;
+  $('res').innerHTML = '<div class="muted">جارٍ البحث…</div>';
+  rpc('imp_list', {p_status:-1, p_q:q, p_limit:100}).then(function(r){ $('res').innerHTML = vehicleList(r, 'لا توجد نتائج'); })
+    .catch(function(e){ $('res').innerHTML = '<div class="msg err">'+esc(e.message)+'</div>'; });
+}
+
+function vehicleList(rows, empty){
+  if(!rows.length) return '<div class="muted" style="padding:10px 0">'+(empty||'لا توجد مركبات')+'</div>';
+  return '<ul class="list">' + rows.map(function(v){
+    return '<li onclick="go(\'#v/'+v.id+'\')"><div class="grow"><div class="t">'+esc(v.plate || (v.vin ? 'هيكل ' + v.vin : 'بلا لوحة'))
+      + ' ' + statusTag(v.status) + (v.has_belongings?'<span class="tag bel">فيها مقتنيات</span>':'') + (v.legacy_review?'<span class="tag legacy">تحتاج تدقيق من الإكسل</span>':'') + '</div>'
+      + '<div class="s">'+esc([v.make_model, v.color].filter(Boolean).join(' · ')) + ' — ' + esc(v.site_name)
+      + (v.impound_no ? ' — إيواء <span class="mono">'+esc(v.impound_no)+'</span>' : '')
+      + ' — دخول ' + fmtDate(v.entry_at) + (v.entry_at && v.status!==7 ? ' ('+days(v.entry_at)+' يوماً)' : '') + '</div></div>'
+      + '<span class="muted mono">#'+v.id+'</span></li>';
+  }).join('') + '</ul>';
+}
+
+/* ================= قائمة المركبات ================= */
+function viewList(V){
+  var qs = new URLSearchParams((location.hash.split('?')[1])||'');
+  var site = qs.get('site')||'', status = parseInt(qs.get('status')||'0',10), old = qs.get('old')==='1';
+  var opts = ME.all_sites.map(function(s){ return '<option value="'+s.code+'"'+(s.code===site?' selected':'')+'>'+esc(s.name)+'</option>'; }).join('');
+  var sts = [[0,'داخل المواقع'],[1,STATUS[1]],[2,STATUS[2]],[3,STATUS[3]],[7,'الأرشيف (خرجت)'],[-1,'الكل']]
+    .map(function(s){ return '<option value="'+s[0]+'"'+(s[0]===status?' selected':'')+'>'+s[1]+'</option>'; }).join('');
+  V.innerHTML = '<div class="card"><div class="row"><div class="field grow"><label>الموقع</label><select id="fSite"><option value="">كل المواقع</option>'+opts+'</select></div>'
+    + '<div class="field grow"><label>الحالة</label><select id="fSt">'+sts+'</select></div></div><div id="lst" class="muted">جارٍ التحميل…</div><div id="more"></div></div>';
+  $('fSite').onchange = $('fSt').onchange = function(){ go('#list?site='+$('fSite').value+'&status='+$('fSt').value); };
+  var off = 0, all = [];
+  function page(){
+    rpc('imp_list', {p_site:site, p_status:status, p_limit:100, p_offset:off}).then(function(r){
+      off += r.length;
+      if(old) r = r.filter(function(v){ return v.entry_at && days(v.entry_at) > 30; });
+      all = all.concat(r);
+      $('lst').innerHTML = vehicleList(all);
+      $('more').innerHTML = r.length && off % 100 === 0 ? '<button class="btn ghost" id="mb">المزيد</button>' : '';
+      if($('mb')) $('mb').onclick = page;
+    }).catch(function(e){ fail($('lst'), e); });
+  }
+  page();
+}
+
+/* ================= إيواء جديد (الحارس) ================= */
+var IN = null;
+function viewIntake(V){
+  if(!can('guard','dhahban')) return fail(V, new Error('هذه الشاشة للحارس وموظف ذهبان'));
+  if(!IN) IN = {step:0, photos:{}, belongings:[], data:{site: ME.sites[0] || '', plate:'', vin:'', impound_no:'', source_place:'', driver_id:'', noPlate:false}, newDriver:null, checks:null};
+  window._leave = function(){ gpsStop(); };
+  renderIntake(V);
+}
+function intakeReset(){ IN = null; gpsStop(); }
+
+function renderIntake(V){
+  V = V || $('view');
+  var n = INTAKE_STEPS.length, s = IN.step;
+  var dots = '<div class="dots">' + INTAKE_STEPS.concat([{},{},{}]).map(function(_,i){ return '<i class="'+(i<s?'done':i===s?'cur':'')+'"></i>'; }).join('') + '</div>';
+  if(s < n){
+    var st = INTAKE_STEPS[s], ph = IN.photos[st.kind];
+    V.innerHTML = '<div class="card step">'+dots+'<div class="num">صورة '+(s+1)+' من '+n+'</div><h2>'+st.title+'</h2>'
+      + (ph ? '<img class="preview" src="'+ph.blobUrl+'" alt="">' : '<p class="muted" style="margin-bottom:14px">'+esc(st.hint)+'</p>')
+      + '<button class="btn big '+(ph?'ghost':'')+'" id="cap">'+(ph?'إعادة التصوير':'📷 التقاط الصورة')+'</button>'
+      + '<div class="row" style="margin-top:10px">'+(s>0?'<button class="btn ghost grow" id="back">السابق</button>':'<button class="btn ghost grow" id="cancel">إلغاء</button>')
+      + '<button class="btn grow" id="next" '+(ph?'':'disabled')+'>التالي</button></div></div>';
+    $('cap').onclick = function(){ pickPhoto(false).then(function(f){ if(!f.length) return; $('cap').disabled=true; $('cap').textContent='جارٍ تجهيز الصورة…';
+      compressImage(f[0]).then(function(b){ IN.photos[st.kind] = {kind:st.kind, blob:b, blobUrl:URL.createObjectURL(b), taken_at:Date.now()}; renderIntake(); })
+      .catch(function(){ toast('تعذّر قراءة الصورة، حاول مرة أخرى'); renderIntake(); }); }); };
+    if($('back')) $('back').onclick = function(){ IN.step--; renderIntake(); };
+    if($('cancel')) $('cancel').onclick = function(){ if(confirmLeave()){ intakeReset(); go('#dash'); } };
+    $('next').onclick = function(){ IN.step++; renderIntake(); };
+    return;
+  }
+  if(s === n) return renderIntakeForm(V, dots);
+  if(s === n+1) return renderIntakeParking(V, dots);
+  return renderIntakeFinal(V, dots);
+}
+function confirmLeave(){ return Object.keys(IN.photos).length === 0 || window.confirm('سيُحذف ما صوّرته. متأكد؟'); }
+
+function siteSelect(id, val, list){
+  return '<select id="'+id+'">' + list.map(function(c){ return '<option value="'+c+'"'+(c===val?' selected':'')+'>'+esc(SITES[c]||c)+'</option>'; }).join('') + '</select>';
+}
+
+var DRIVERS = null;
+function loadDrivers(force){
+  if(DRIVERS && !force) return Promise.resolve(DRIVERS);
+  return rpc('imp_drivers_list', {p_q:''}).then(function(d){ DRIVERS = d; return d; });
+}
+function driverPicker(selId, curId){
+  return loadDrivers().then(function(d){
+    var o = '<option value="">— اختر السائق —</option><optgroup label="سائقو المؤسسة">'
+      + d.filter(function(x){return x.kind==='internal';}).map(function(x){ return '<option value="'+x.id+'"'+(String(x.id)===String(curId)?' selected':'')+'>'+esc(x.name)+'</option>'; }).join('')
+      + '</optgroup><optgroup label="من خارج المؤسسة">'
+      + d.filter(function(x){return x.kind==='external';}).map(function(x){ return '<option value="'+x.id+'"'+(String(x.id)===String(curId)?' selected':'')+'>'+esc(x.name)+(x.phone?' — '+x.phone:'')+'</option>'; }).join('')
+      + '</optgroup><option value="new">+ سائق جديد من خارج المؤسسة</option>';
+    $(selId).innerHTML = o;
+  }).catch(function(){ $(selId).innerHTML = '<option value="">تعذّر تحميل السائقين</option><option value="new">+ سائق جديد</option>'; });
+}
+
+function renderIntakeForm(V, dots){
+  var d = IN.data;
+  V.innerHTML = '<div class="card">'+dots+'<h2>بيانات الوصول</h2>'
+    + (ME.sites.length > 1 ? '<div class="field"><label>الموقع</label>'+siteSelect('fSite', d.site, ME.sites)+'</div>' : '<p class="muted" style="margin-bottom:10px">الموقع: <b>'+esc(SITES[d.site]||'')+'</b></p>')
+    + '<div class="field" id="plateF"><label>رقم اللوحة *</label><input id="fPlate" value="'+esc(d.plate)+'" placeholder="مثال: ا ب ق 1665" '+(d.noPlate?'disabled':'')+'></div>'
+    + '<label class="chk"><input type="checkbox" id="fNoPlate" '+(d.noPlate?'checked':'')+'> المركبة بلا لوحة (يُستخدم رقم الهيكل)</label>'
+    + '<div class="field" id="vinF" style="'+(d.noPlate?'':'display:none')+'"><label>رقم الهيكل *</label><input id="fVin" class="mono" value="'+esc(d.vin)+'" style="text-transform:uppercase"></div>'
+    + '<div class="field"><label>رقم الإيواء (اختياري)</label><input id="fIno" class="mono" inputmode="numeric" value="'+esc(d.impound_no)+'"></div>'
+    + '<div id="checks"></div>'
+    + '<div class="field"><label>السائق *</label><select id="fDrv"><option>جارٍ التحميل…</option></select></div>'
+    + '<div id="newDrv" style="display:none"><div class="row"><div class="field grow"><label>جوال السائق</label><input id="ndPhone" inputmode="tel" class="mono"></div>'
+    + '<div class="field grow"><label>اسم السائق</label><input id="ndName"></div></div><div class="hint muted" id="ndHint" style="margin:-6px 0 10px"></div></div>'
+    + '<div class="field"><label>من أين أتت المركبة *</label><input id="fSrc" value="'+esc(d.source_place)+'" placeholder="مثلاً: قسم شرطة الجامعة"></div>'
+    + '<div class="row"><button class="btn ghost grow" id="back">السابق</button><button class="btn grow" id="next">التالي</button></div></div>';
+  driverPicker('fDrv', d.driver_id).then(function(){ if(IN.newDriver){ $('fDrv').value='new'; showNd(); } });
+  function showNd(){ $('newDrv').style.display = $('fDrv').value==='new' ? '' : 'none';
+    if(IN.newDriver){ $('ndPhone').value = IN.newDriver.phone; $('ndName').value = IN.newDriver.name; } }
+  $('fDrv').onchange = showNd;
+  $('ndPhone').onblur = function(){
+    var ph = $('ndPhone').value.replace(/\D/g,''); if(ph.length < 9 || !DRIVERS) return;
+    var hit = DRIVERS.filter(function(x){ return x.kind==='external' && x.phone===ph; })[0];
+    if(hit){ $('fDrv').value = hit.id; showNd(); toast('السائق مسجل من قبل: ' + hit.name); }
+  };
+  if($('fSite')) $('fSite').onchange = function(){ d.site = $('fSite').value; };
+  $('fNoPlate').onchange = function(){ d.noPlate = this.checked; $('fPlate').disabled = d.noPlate; $('vinF').style.display = d.noPlate?'':'none'; };
+  var chk = function(){
+    var p = $('fPlate').value.trim(), v = $('fVin').value.trim(), i = $('fIno').value.trim();
+    if(!p && !v && !i) { $('checks').innerHTML=''; IN.checks=null; return; }
+    rpc('imp_check', {p_plate: d.noPlate?'':p, p_vin: v, p_impound_no: i}).then(function(r){
+      IN.checks = r;
+      $('checks').innerHTML = r.warnings.map(function(w){ return '<div class="msg '+(w.block?'err':'warn')+'">'+esc(w.msg)+'</div>'; }).join('')
+        + (r.history.length ? '<div class="msg warn">دخلت هذه اللوحة الحجز '+r.history.length+' مرة من قبل.</div>' : '');
+    }).catch(function(){});
+  };
+  $('fPlate').onblur = $('fVin').onblur = $('fIno').onblur = chk;
+  if(d.plate || d.vin || d.impound_no) chk();
+  $('back').onclick = function(){ save(); IN.step--; renderIntake(); };
+  function save(){
+    d.plate = d.noPlate ? '' : $('fPlate').value.trim(); d.vin = $('fVin').value.trim().toUpperCase();
+    d.impound_no = $('fIno').value.trim(); d.source_place = $('fSrc').value.trim();
+    var dv = $('fDrv').value;
+    if(dv === 'new'){ d.driver_id = ''; IN.newDriver = {name:$('ndName').value.trim(), phone:$('ndPhone').value.replace(/\D/g,'')}; }
+    else { d.driver_id = dv; IN.newDriver = null; }
+  }
+  $('next').onclick = function(){
+    save();
+    var err = null;
+    if(!d.noPlate && !d.plate) err = 'اكتب رقم اللوحة، أو اختر «بلا لوحة» واكتب رقم الهيكل';
+    else if(d.noPlate && d.vin.replace(/\s/g,'').length < 5) err = 'اكتب رقم الهيكل';
+    else if(!d.driver_id && !IN.newDriver) err = 'اختر السائق';
+    else if(IN.newDriver && !IN.newDriver.name) err = 'اكتب اسم السائق الجديد';
+    else if(!d.source_place) err = 'اكتب من أين أتت المركبة';
+    else if(IN.checks && IN.checks.warnings.some(function(w){ return w.block; })) err = 'رقم الإيواء مسجل من قبل، صحّحه أو اتركه فارغاً';
+    if(err){ toast(err, 3500); return; }
+    IN.step++; renderIntake();
+  };
+}
+
+function renderIntakeParking(V, dots){
+  var ph = IN.photos.parking;
+  function draw(){
+    if(location.hash !== '#new' || IN.step !== INTAKE_STEPS.length+1) return;
+    V.innerHTML = '<div class="card step">'+dots+'<h2>صوّر المركبة في مكانها</h2>'
+      + '<p class="muted" style="margin-bottom:10px">بعد تنزيلها من المصفحة. تُحفظ الصورة مع إحداثيات المكان.</p>'
+      + gpsBox()
+      + (ph ? '<img class="preview" src="'+ph.blobUrl+'" alt=""><div class="msg ok">حُفظ الموقع بدقة <span class="mono">'+ph.accuracy+' م</span></div>' : '')
+      + '<button class="btn big '+(ph?'ghost':'')+'" id="cap" '+(gpsGood()?'':'disabled')+'>'+(ph?'إعادة التصوير':'📷 التقاط الصورة')+'</button>'
+      + '<div class="row" style="margin-top:10px"><button class="btn ghost grow" id="back">السابق</button><button class="btn grow" id="next" '+(ph?'':'disabled')+'>التالي</button></div></div>';
+    $('cap').onclick = function(){
+      var fix = Object.assign({}, gps.fix);
+      pickPhoto(false).then(function(f){ if(!f.length) return;
+        if(gps.fix && gps.fix.accuracy < fix.accuracy) fix = Object.assign({}, gps.fix);
+        if(!(fix.accuracy <= GPS_MAX_M)){ toast('الدقة لم تصل '+GPS_MAX_M+' أمتار، أعد المحاولة'); return; }
+        compressImage(f[0]).then(function(b){ ph = IN.photos.parking = {kind:'parking', blob:b, blobUrl:URL.createObjectURL(b), lat:fix.lat, lng:fix.lng, accuracy:fix.accuracy}; draw(); });
+      });
+    };
+    $('back').onclick = function(){ IN.step--; renderIntake(); };
+    $('next').onclick = function(){ IN.step++; renderIntake(); };
+  }
+  gpsStart(draw); draw();
+}
+
+function renderIntakeFinal(V, dots){
+  var d = IN.data, drv = IN.newDriver ? IN.newDriver.name + ' (جديد)' : ((DRIVERS||[]).filter(function(x){ return String(x.id)===String(d.driver_id); })[0]||{}).name;
+  var photos = INTAKE_STEPS.map(function(s){ return IN.photos[s.kind]; }).concat([IN.photos.parking]).concat(IN.belongings);
+  V.innerHTML = '<div class="card">'+dots+'<h2>مراجعة وتسجيل الدخول</h2>'
+    + '<dl class="kv" style="margin-bottom:12px"><dt>الموقع</dt><dd>'+esc(SITES[d.site])+'</dd>'
+    + '<dt>'+(d.noPlate?'رقم الهيكل':'اللوحة')+'</dt><dd>'+esc(d.noPlate?d.vin:d.plate)+'</dd>'
+    + (d.impound_no?'<dt>رقم الإيواء</dt><dd class="mono">'+esc(d.impound_no)+'</dd>':'')
+    + '<dt>السائق</dt><dd>'+esc(drv||'')+'</dd><dt>من</dt><dd>'+esc(d.source_place)+'</dd></dl>'
+    + photoGrid(photos)
+    + '<h3 style="margin-top:14px">مقتنيات المركبة (اختياري)</h3>'
+    + '<p class="muted">إذا كان داخل المركبة أغراض، صوّرها هنا. يمكن الإضافة لاحقاً أيضاً.</p>'
+    + '<div class="field"><input id="belNote" placeholder="ملاحظة قصيرة: حقيبة، أدوات، جوال…"></div>'
+    + '<button class="btn ghost" id="bel">+ إضافة صور مقتنيات</button>'
+    + '<div id="msg" style="margin-top:12px"></div>'
+    + '<div class="row" style="margin-top:12px"><button class="btn ghost grow" id="back">السابق</button><button class="btn ok grow" id="go">✓ تسجيل دخول</button></div></div>';
+  loadPhotoUrls([]);
+  $('bel').onclick = function(){ pickPhoto(true).then(function(fs){
+    var note = $('belNote').value.trim();
+    Promise.all(fs.map(compressImage)).then(function(bs){ bs.forEach(function(b){ IN.belongings.push({kind:'belongings', blob:b, blobUrl:URL.createObjectURL(b), note:note}); }); renderIntake(); });
+  }); };
+  $('back').onclick = function(){ IN.step--; renderIntake(); };
+  $('go').onclick = function(){
+    var btn = $('go'); btn.disabled = true; btn.textContent = 'جارٍ الإرسال…';
+    var it = {client_ref: uuid(), type:'intake', label: d.plate || d.vin,
+      data: {site:d.site, plate:d.plate, vin:d.vin, impound_no:d.impound_no, source_place:d.source_place, driver_id:d.driver_id, taken_at: new Date(IN.photos.police_doc.taken_at).toISOString()},
+      newDriver: IN.newDriver,
+      photos: photos.map(function(p){ return {kind:p.kind, blob:p.blob, lat:p.lat, lng:p.lng, accuracy:p.accuracy, note:p.note||''}; })};
+    submitOp(it, function(res, queued){
+      intakeReset(); DRIVERS = null;
+      if(queued){ $('view').innerHTML = '<div class="card center"><h2>حُفظ الإيواء على الجهاز</h2><p class="muted">لا يوجد اتصال الآن. سيُرسل تلقائياً عند عودة الشبكة، لا تحذف بيانات المتصفح.</p><p style="margin-top:14px"><a class="btn" href="#new">إيواء جديد</a></p></div>'; }
+      else { $('view').innerHTML = '<div class="card center"><h2>✓ تم تسجيل الدخول</h2><p class="muted">رقم الملف <b class="mono">'+res.id+'</b>، بانتظار مراجعة مدخل البيانات.</p><p style="margin-top:14px" class="row" style="justify-content:center"><a class="btn" href="#new">إيواء جديد</a> <a class="btn ghost" href="#v/'+res.id+'">فتح الملف</a></p></div>'; }
+    }).catch(function(e){ btn.disabled=false; btn.textContent='✓ تسجيل دخول'; $('msg').innerHTML = '<div class="msg err">'+esc(e.message)+'</div>'; });
+  };
+}
+
+/* ================= ملف المركبة ================= */
+function viewVehicle(V, p){
+  var id = parseInt(p[0],10);
+  V.innerHTML = '<div class="center muted">جارٍ التحميل…</div>';
+  rpc('imp_vehicle', {p_id:id}).then(function(v){
+    window._veh = v;
+    return loadPhotoUrls(v.photos.map(function(x){ return x.path; })).catch(function(){}).then(function(){ renderVehicle(V, v); });
+  }).catch(function(e){ fail(V,e); });
+}
+
+function renderVehicle(V, v){
+  var main = v.photos.filter(function(x){ return ['police_doc','front','back','right','left','vin','parking'].indexOf(x.kind) >= 0 && !x.movement_id; });
+  var bel = v.photos.filter(function(x){ return x.kind === 'belongings'; });
+  var mv = v.photos.filter(function(x){ return x.movement_id; });
+  var last = v.photos.filter(function(x){ return x.lat && (x.kind==='parking' || x.kind==='transfer_in'); }).pop();
+  var canEdit = can('data_entry') && v.status !== 7;
+  var atSite = ME.role==='manager' || ME.sites.indexOf(v.site) >= 0;
+  var inside = [1,2,4,5,6].indexOf(v.status) >= 0;
+  var h = '<div class="card"><div class="row"><div class="grow"><h2 style="margin:0">'+esc(v.plate || (v.vin?'هيكل '+v.vin:'بلا لوحة'))+' '+statusTag(v.status)
+    + (v.has_belongings?'<span class="tag bel">فيها مقتنيات</span>':'')+'</h2>'
+    + '<div class="muted">ملف <span class="mono">#'+v.id+'</span> · '+esc(v.site_name)+' · دخول '+fmtDT(v.entry_at)+(v.status!==7&&v.entry_at?' ('+days(v.entry_at)+' يوماً)':'')+'</div></div>'
+    + (last ? '<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+last.lat+','+last.lng+'">📍 مكانها على الخريطة</a>' : '') + '</div></div>';
+
+  h += '<div class="grid2"><div class="card"><h3>الصور</h3>' + photoGrid(main) + '</div><div class="card">';
+  if(canEdit) h += editForm(v);
+  else h += '<h3>البيانات</h3><dl class="kv">'
+    + kv('رقم الإيواء', v.impound_no, true) + kv('اللوحة', v.plate) + kv('رقم الهيكل', v.vin, true)
+    + kv('النوع', v.make_model) + kv('الموديل', v.model_year, true) + kv('اللون', v.color) + kv('التصنيف', v.vehicle_class)
+    + kv('الضابط الموقّع', v.officer_name) + kv('من أين أتت', v.source_place) + kv('السائق', v.driver && v.driver.name)
+    + kv('سجّلها', v.created_by) + kv('راجعها', v.reviewed_by ? v.reviewed_by + ' — ' + fmtDT(v.reviewed_at) : '') + '</dl>';
+  h += '</div></div>';
+
+  if(v.legacy_notes && Object.keys(v.legacy_notes).length){
+    h += '<div class="card"><h3>بيانات من سجل الإكسل السابق (صف '+v.legacy_row+')</h3><dl class="kv">'
+      + Object.keys(v.legacy_notes).map(function(k){ return kv(k, v.legacy_notes[k]); }).join('') + '</dl></div>';
+  }
+
+  h += '<div class="card"><div class="row"><h3 class="grow">المقتنيات</h3>'
+    + (can('guard','dhahban','data_entry') && atSite && v.status!==7 ? '<button class="btn ghost" id="addBel">+ صور مقتنيات</button>' : '') + '</div>'
+    + (bel.length ? photoGrid(bel) : '<div class="muted">لم تُسجل مقتنيات</div>') + '<div id="belBox"></div></div>';
+
+  if(can('guard','dhahban') && atSite && inside){
+    h += '<div class="card"><h3>نقل إلى موقع آخر</h3><div id="trBox"><button class="btn amber" id="trOpen">نقل المركبة</button></div></div>';
+  }
+
+  if(v.movements.length){
+    h += '<div class="card"><h3>سجل التنقلات</h3><table class="t"><tr><th>من</th><th>إلى</th><th>السائق</th><th>الإرسال</th><th>الاستلام</th></tr>'
+      + v.movements.map(function(m){ return '<tr><td>'+esc(m.from)+'</td><td>'+esc(m.to)+'</td><td>'+esc(m.driver||'')+'</td><td>'+esc(m.sent_by)+'<br><span class="muted">'+fmtDT(m.sent_at)+'</span></td><td>'
+        + (m.state==='received' ? esc(m.received_by)+'<br><span class="muted">'+fmtDT(m.received_at)+'</span>' : '<span class="tag s3">في الطريق</span>') + '</td></tr>'; }).join('')
+      + '</table>' + (mv.length ? '<div style="margin-top:10px">'+photoGrid(mv)+'</div>' : '') + '</div>';
+  }
+  if(v.history.length){
+    h += '<div class="card"><h3>مرات دخول سابقة لنفس المركبة</h3><ul class="list">' + v.history.map(function(x){
+      return '<li onclick="go(\'#v/'+x.id+'\')"><div class="grow">ملف <span class="mono">#'+x.id+'</span> '+statusTag(x.status)+'</div><div class="muted">دخول '+fmtDate(x.entry_at)+(x.exit_at?' · خروج '+fmtDate(x.exit_at):'')+'</div></li>'; }).join('') + '</ul></div>';
+  }
+  h += '<div class="card"><details><summary>سجل التعديلات</summary><table class="t">' + v.audit.map(function(a){
+      return '<tr><td>'+fmtDT(a.at)+'</td><td>'+esc(a.username)+'</td><td>'+esc(auditLabel(a.action))+'</td><td class="muted" style="font-size:12px">'+esc(auditText(a))+'</td></tr>'; }).join('') + '</table></details></div>';
+  V.innerHTML = h;
+
+  if(canEdit) bindEdit(v);
+  if($('addBel')) $('addBel').onclick = function(){ addBelongings(v); };
+  if($('trOpen')) $('trOpen').onclick = function(){ openTransfer(v); };
+}
+function kv(k, val, mono){ return (val === null || val === undefined || val === '') ? '' : '<dt>'+esc(k)+'</dt><dd'+(mono?' class="mono"':'')+'>'+esc(val)+'</dd>'; }
+function auditLabel(a){ return {intake:'تسجيل دخول',review:'مراجعة وحفظ',edit:'تعديل',belongings:'صور مقتنيات',transfer_send:'إرسال للنقل',transfer_receive:'استلام بعد النقل'}[a] || a; }
+function auditText(a){
+  if(a.action==='review' || a.action==='edit'){ var c=a.changes||{}; return Object.keys(c).filter(function(k){return k!=='status';}).map(function(k){ return k+': '+(c[k][0]===null||c[k][0]===''?'—':c[k][0])+' ← '+(c[k][1]===null||c[k][1]===''?'—':c[k][1]); }).join(' | '); }
+  if(a.action==='transfer_send') return SITES[a.changes.from]+' → '+SITES[a.changes.to];
+  return '';
+}
+
+/* ---- نموذج مدخل البيانات ---- */
+function editForm(v){
+  return '<h3>'+(v.status===1?'مراجعة البيانات':'البيانات')+'</h3>'
+    + '<p class="muted" style="margin-bottom:10px">طابق كل قيمة مع الصور قبل الحفظ.</p>'
+    + fld('eIno','رقم الإيواء', v.impound_no, 'mono', 'numeric')
+    + fld('ePlate','رقم اللوحة', v.plate)
+    + '<div class="field" id="vinField"><label>رقم الهيكل</label><input id="eVin" class="mono" style="text-transform:uppercase" value="'+esc(v.vin)+'"><div class="hint" id="vinHint"></div></div>'
+    + '<label class="chk" id="vinNsWrap" style="display:none"><input type="checkbox" id="eVinNs" '+(v.vin_nonstandard?'checked':'')+'> رقم هيكل قديم غير قياسي (تأكدت منه من الصورة)</label>'
+    + '<div class="row"><div class="grow">'+fld('eMake','النوع', v.make_model)+'</div><div class="grow">'+fld('eYear','الموديل', v.model_year||'', 'mono', 'numeric')+'</div></div>'
+    + '<div class="row"><div class="grow">'+fld('eColor','اللون', v.color)+'</div><div class="grow">'+fld('eClass','التصنيف', v.vehicle_class, '', '', 'خصوصي، نقل، أجرة، دراجة…')+'</div></div>'
+    + fld('eOfficer','اسم الضابط الموقّع', v.officer_name)
+    + fld('eSrc','من أين أتت', v.source_place)
+    + '<div class="field"><label>ملاحظات</label><textarea id="eNotes">'+esc(v.notes)+'</textarea></div>'
+    + '<div id="eChecks"></div><div id="eMsg"></div>'
+    + '<button class="btn '+(v.status===1?'ok':'')+' big" id="eSave">'+(v.status===1?'✓ حفظ — مكتملة البيانات':'حفظ التعديل')+'</button>';
+}
+function fld(id, label, val, cls, im, ph){ return '<div class="field"><label>'+label+'</label><input id="'+id+'" class="'+(cls||'')+'" '+(im?'inputmode="'+im+'"':'')+' '+(ph?'placeholder="'+esc(ph)+'"':'')+' value="'+esc(val==null?'':val)+'"></div>'; }
+function vinCheck(){
+  var v = $('eVin').value.toUpperCase().replace(/[\s.\-]/g,''), f = $('vinField'), h = $('vinHint');
+  f.classList.remove('bad','good'); $('vinNsWrap').style.display='none';
+  if(!v){ h.textContent=''; return true; }
+  var bad = [];
+  if(v.length !== 17) bad.push('عدد الخانات ' + v.length + ' والمطلوب 17');
+  if(/[IOQ]/.test(v)) bad.push('فيه حرف I أو O أو Q (غالباً المقصود 1 أو 0)');
+  if(/[^A-Z0-9]/.test(v)) bad.push('فيه رموز غير مسموحة');
+  if(!bad.length){ f.classList.add('good'); h.textContent = '✓ رقم هيكل صحيح الشكل'; return true; }
+  f.classList.add('bad'); h.textContent = bad.join('، '); $('vinNsWrap').style.display='';
+  return $('eVinNs').checked;
+}
+function bindEdit(v){
+  $('eVin').oninput = vinCheck; $('eVinNs').onchange = vinCheck; vinCheck();
+  var chk = function(){
+    rpc('imp_check', {p_plate:$('ePlate').value, p_vin:$('eVin').value, p_impound_no:$('eIno').value, p_exclude:v.id}).then(function(r){
+      $('eChecks').innerHTML = r.warnings.map(function(w){ return '<div class="msg '+(w.block?'err':'warn')+'">'+esc(w.msg)+'</div>'; }).join('');
+    }).catch(function(){});
+  };
+  $('ePlate').onblur = $('eIno').onblur = $('eVin').onblur = chk;
+  $('eSave').onclick = function(){
+    if(!vinCheck()){ toast('صحّح رقم الهيكل، أو علّم أنه قديم غير قياسي', 3500); return; }
+    var b = $('eSave'); b.disabled = true;
+    rpc('imp_vehicle_save', {p_id:v.id, p_data:{
+      impound_no:$('eIno').value, plate:$('ePlate').value, vin:$('eVin').value, vin_nonstandard:$('eVinNs').checked,
+      make_model:$('eMake').value, model_year:$('eYear').value, color:$('eColor').value, vehicle_class:$('eClass').value,
+      officer_name:$('eOfficer').value, source_place:$('eSrc').value, notes:$('eNotes').value}})
+    .then(function(r){
+      toast('✓ تم الحفظ');
+      if(v.status === 1 && /^#review/.test(window._from||'')) go('#review'); else viewVehicle($('view'), [v.id]);
+    }).catch(function(e){ b.disabled=false; $('eMsg').innerHTML = '<div class="msg err">'+esc(e.message)+'</div>'; });
+  };
+}
+
+/* ---- صور مقتنيات لاحقة ---- */
+function addBelongings(v){
+  $('belBox').innerHTML = '<div class="field" style="margin-top:10px"><input id="bNote" placeholder="ملاحظة قصيرة: حقيبة، أدوات، جوال…"></div><button class="btn" id="bPick">📷 اختيار الصور</button>';
+  $('bPick').onclick = function(){
+    pickPhoto(true).then(function(fs){ if(!fs.length) return;
+      $('bPick').disabled = true; $('bPick').textContent = 'جارٍ الإرسال…';
+      Promise.all(fs.map(compressImage)).then(function(bs){
+        var it = {client_ref:uuid(), type:'belongings', label:'مقتنيات '+(v.plate||v.id), data:{vehicle_id:v.id},
+                  photos: bs.map(function(b){ return {kind:'belongings', blob:b, note:$('bNote').value.trim()}; })};
+        return submitOp(it, function(res, queued){ toast(queued ? 'حُفظت على الجهاز وستُرسل عند عودة الاتصال' : '✓ أُضيفت صور المقتنيات'); viewVehicle($('view'), [v.id]); });
+      }).catch(function(e){ $('belBox').innerHTML = '<div class="msg err">'+esc(e.message)+'</div>'; });
+    });
+  };
+}
+
+/* ---- النقل ---- */
+function openTransfer(v){
+  var others = ME.all_sites.filter(function(s){ return s.active && s.code !== v.site; });
+  $('trBox').innerHTML = '<div class="field"><label>إلى الموقع</label><select id="tTo">'+others.map(function(s){ return '<option value="'+s.code+'">'+esc(s.name)+'</option>'; }).join('')+'</select></div>'
+    + '<div class="field"><label>السائق</label><select id="tDrv"><option>جارٍ التحميل…</option></select></div>'
+    + '<p class="muted">صوّر المركبة على المصفحة عند خروجها.</p><div id="tPrev"></div>'
+    + '<div class="row" style="margin-top:8px"><button class="btn ghost grow" id="tCap">📷 تصوير على المصفحة</button><button class="btn amber grow" id="tGo" disabled>إرسال للنقل</button></div><div id="tMsg"></div>';
+  driverPicker('tDrv', v.driver_id).then(function(){ var o=$('tDrv').querySelector('option[value=new]'); if(o) o.remove(); });
+  var shot = null;
+  $('tCap').onclick = function(){ pickPhoto(false).then(function(f){ if(!f.length) return; compressImage(f[0]).then(function(b){
+    shot = b; $('tPrev').innerHTML = '<img class="preview" style="width:100%;border-radius:10px" src="'+URL.createObjectURL(b)+'">'; $('tGo').disabled = false; }); }); };
+  $('tGo').onclick = function(){
+    if(!$('tDrv').value){ toast('اختر السائق'); return; }
+    $('tGo').disabled = true;
+    var it = {client_ref:uuid(), type:'transfer_send', label:'نقل '+(v.plate||v.id), data:{vehicle_id:v.id, to_site:$('tTo').value, driver_id:$('tDrv').value},
+              photos:[{kind:'transfer_out', blob:shot}]};
+    submitOp(it, function(res, queued){ toast(queued ? 'حُفظ النقل على الجهاز وسيُرسل عند عودة الاتصال' : '✓ المركبة الآن «في النقل»'); viewVehicle($('view'), [v.id]); })
+      .catch(function(e){ $('tGo').disabled=false; $('tMsg').innerHTML = '<div class="msg err">'+esc(e.message)+'</div>'; });
+  };
+}
+
+/* ================= قادمة إليك ================= */
+function viewIncoming(V){
+  V.innerHTML = '<div class="center muted">جارٍ التحميل…</div>';
+  rpc('imp_incoming').then(function(r){
+    if(!r.length){ V.innerHTML = '<div class="card center"><h2>لا توجد مركبات قادمة</h2><p class="muted">المركبات المرسلة إلى موقعك من موقع آخر تظهر هنا.</p></div>'; return; }
+    V.innerHTML = '<div class="card"><h2>قادمة إليك ('+r.length+')</h2><ul class="list">' + r.map(function(m){
+      return '<li onclick="go(\'#incoming/'+m.movement_id+'\')"><div class="grow"><div class="t">'+esc(m.plate || m.vin)+' — '+esc(m.make_model||'')+' '+esc(m.color||'')+'</div>'
+        + '<div class="s">من '+esc(m.from)+' إلى '+esc(m.to)+' · السائق '+esc(m.driver||'—')+' · أُرسلت '+fmtDT(m.sent_at)+'</div></div><span class="btn ghost">استلام</span></li>'; }).join('') + '</ul></div>';
+    var id = parseInt((location.hash.split('/')[1])||'',10);
+    if(id){ var m = r.filter(function(x){ return x.movement_id===id; })[0]; if(m) receiveView(V, m); }
+  }).catch(function(e){ fail(V,e); });
+}
+function receiveView(V, m){
+  window._leave = function(){ gpsStop(); };
+  var shot = null;
+  rpc('imp_vehicle', {p_id:m.vehicle_id}).then(function(v){
+    var ph = v.photos.filter(function(x){ return ['front','back','right','left','vin','transfer_out'].indexOf(x.kind)>=0; });
+    return loadPhotoUrls(ph.map(function(x){return x.path;})).catch(function(){}).then(function(){
+      function draw(){
+        if(!/^#incoming\//.test(location.hash)) return;
+        V.innerHTML = '<div class="card"><h2>استلام: '+esc(v.plate||v.vin)+'</h2><p class="muted">من '+esc(m.from)+' · طابق المركبة مع صورها، ثم صوّرها في مكانها الجديد.</p></div>'
+          + '<div class="card"><h3>صور المركبة</h3>'+photoGrid(ph)+'</div>'
+          + '<div class="card step"><h3>صورة في المكان الجديد</h3>'+gpsBox()
+          + (shot ? '<img class="preview" src="'+shot.blobUrl+'"><div class="msg ok">الموقع بدقة <span class="mono">'+shot.accuracy+' م</span></div>' : '')
+          + '<button class="btn big '+(shot?'ghost':'')+'" id="rCap" '+(gpsGood()?'':'disabled')+'>'+(shot?'إعادة التصوير':'📷 التقاط الصورة')+'</button>'
+          + '<button class="btn ok big" style="margin-top:10px" id="rGo" '+(shot?'':'disabled')+'>✓ تم الاستلام</button><div id="rMsg"></div></div>';
+        $('rCap').onclick = function(){ var fix = Object.assign({}, gps.fix); pickPhoto(false).then(function(f){ if(!f.length) return;
+          if(gps.fix && gps.fix.accuracy < fix.accuracy) fix = Object.assign({}, gps.fix);
+          if(!(fix.accuracy <= GPS_MAX_M)){ toast('الدقة لم تصل '+GPS_MAX_M+' أمتار'); return; }
+          compressImage(f[0]).then(function(b){ shot = {kind:'transfer_in', blob:b, blobUrl:URL.createObjectURL(b), lat:fix.lat, lng:fix.lng, accuracy:fix.accuracy}; draw(); }); }); };
+        $('rGo').onclick = function(){ $('rGo').disabled = true;
+          var it = {client_ref:uuid(), type:'transfer_receive', label:'استلام '+(v.plate||v.id), data:{movement_id:m.movement_id},
+                    photos:[{kind:'transfer_in', blob:shot.blob, lat:shot.lat, lng:shot.lng, accuracy:shot.accuracy}]};
+          submitOp(it, function(res, queued){ gpsStop(); toast(queued ? 'حُفظ الاستلام وسيُرسل عند عودة الاتصال' : '✓ تم الاستلام وتحديث العدد'); go('#incoming'); })
+            .catch(function(e){ $('rGo').disabled=false; $('rMsg').innerHTML = '<div class="msg err">'+esc(e.message)+'</div>'; });
+        };
+      }
+      gpsStart(draw); draw();
+    });
+  }).catch(function(e){ fail(V,e); });
+}
+
+/* ================= المراجعة (مدخل البيانات) ================= */
+function viewReview(V, p){
+  window._from = '#review';
+  V.innerHTML = '<div class="center muted">جارٍ التحميل…</div>';
+  rpc('imp_list', {p_status:1, p_limit:200}).then(function(r){
+    V.innerHTML = '<div class="card"><h2>بانتظار المراجعة ('+r.length+')</h2><p class="muted" style="margin-bottom:8px">افتح الملف، طابق البيانات مع الصور، ثم احفظ.</p>' + vehicleList(r, 'لا توجد مركبات بانتظار المراجعة ✓') + '</div>';
+  }).catch(function(e){ fail(V,e); });
+}
+
+/* ================= السائقون ================= */
+function viewDrivers(V){
+  V.innerHTML = '<div class="center muted">جارٍ التحميل…</div>';
+  loadDrivers(true).then(function(d){
+    var canInt = can('accountant','data_entry');
+    V.innerHTML = '<div class="card"><h2>إضافة سائق</h2><div class="row">'
+      + '<div class="field grow"><label>النوع</label><select id="dKind">'+(canInt?'<option value="internal">تابع للمؤسسة</option>':'')+'<option value="external">من خارج المؤسسة</option></select></div>'
+      + '<div class="field grow"><label>الاسم</label><input id="dName"></div><div class="field grow"><label>الجوال</label><input id="dPhone" class="mono" inputmode="tel"></div></div>'
+      + '<button class="btn" id="dAdd">إضافة</button><div id="dMsg"></div></div>'
+      + '<div class="card"><h2>سائقو المؤسسة</h2>' + drvTable(d.filter(function(x){return x.kind==='internal';})) + '</div>'
+      + '<div class="card"><h2>من خارج المؤسسة</h2>' + drvTable(d.filter(function(x){return x.kind==='external';})) + '</div>';
+    $('dAdd').onclick = function(){
+      rpc('imp_driver_save', {p_kind:$('dKind').value, p_name:$('dName').value, p_phone:$('dPhone').value})
+        .then(function(r){ toast(r.existing ? 'هذا الجوال مسجل باسم: ' + r.name : '✓ أُضيف السائق'); viewDrivers(V); })
+        .catch(function(e){ $('dMsg').innerHTML = '<div class="msg err">'+esc(e.message)+'</div>'; });
+    };
+  }).catch(function(e){ fail(V,e); });
+}
+function drvTable(rows){
+  if(!rows.length) return '<div class="muted">لا يوجد</div>';
+  return '<table class="t"><tr><th>الاسم</th><th>الجوال</th></tr>' + rows.map(function(x){ return '<tr><td>'+esc(x.name)+'</td><td class="mono">'+esc(x.phone||'—')+'</td></tr>'; }).join('') + '</table>';
+}
+
+/* ================= الموظفون (المدير) ================= */
+function viewStaff(V){
+  V.innerHTML = '<div class="center muted">جارٍ التحميل…</div>';
+  rpc('imp_staff_list').then(function(r){
+    var siteChecks = ME.all_sites.filter(function(s){return s.active;}).map(function(s){ return '<label class="chk"><input type="checkbox" class="sSite" value="'+s.code+'"> '+esc(s.name)+'</label>'; }).join('');
+    V.innerHTML = '<div class="card"><h2>إضافة موظف أو تعديله</h2><p class="muted" style="margin-bottom:10px">اسم المستخدم هو نفس اسم الدخول في البوابة.</p>'
+      + '<div class="row"><div class="field grow"><label>اسم المستخدم</label><input id="sUser" class="mono" autocapitalize="off"></div><div class="field grow"><label>الاسم الظاهر</label><input id="sName"></div></div>'
+      + '<div class="field"><label>الدور</label><select id="sRole">'+Object.keys(ROLE_NAMES).map(function(k){ return '<option value="'+k+'">'+ROLE_NAMES[k]+'</option>'; }).join('')+'</select></div>'
+      + '<div class="field"><label>المواقع المسموحة</label><div class="row">'+siteChecks+'</div><div class="hint">للحارس وموظف ذهبان. المدير يرى كل المواقع.</div></div>'
+      + '<label class="chk"><input type="checkbox" id="sActive" checked> فعّال</label>'
+      + '<button class="btn" id="sSave">حفظ</button><div id="sMsg"></div></div>'
+      + '<div class="card"><h2>الموظفون</h2><table class="t"><tr><th>المستخدم</th><th>الاسم</th><th>الدور</th><th>المواقع</th><th></th></tr>'
+      + r.map(function(s){ return '<tr style="'+(s.active?'':'opacity:.5')+'"><td class="mono">'+esc(s.username)+'</td><td>'+esc(s.display_name)+'</td><td>'+esc(ROLE_NAMES[s.role])+'</td><td>'
+        + esc(s.sites.map(function(c){return SITES[c]||c;}).join('، '))+'</td><td><button class="btn ghost" data-u="'+esc(JSON.stringify(s))+'" onclick="editStaff(this)">تعديل</button></td></tr>'; }).join('')
+      + '</table></div>';
+    $('sSave').onclick = function(){
+      var sites = Array.prototype.slice.call(document.querySelectorAll('.sSite:checked')).map(function(x){ return x.value; });
+      rpc('imp_staff_save', {p_username:$('sUser').value, p_name:$('sName').value, p_role:$('sRole').value, p_sites:sites, p_active:$('sActive').checked})
+        .then(function(){ toast('✓ تم الحفظ'); viewStaff(V); })
+        .catch(function(e){ $('sMsg').innerHTML = '<div class="msg err">'+esc(e.message)+'</div>'; });
+    };
+  }).catch(function(e){ fail(V,e); });
+}
+function editStaff(btn){
+  var s = JSON.parse(btn.getAttribute('data-u'));
+  $('sUser').value = s.username; $('sName').value = s.display_name; $('sRole').value = s.role; $('sActive').checked = s.active;
+  document.querySelectorAll('.sSite').forEach(function(x){ x.checked = s.sites.indexOf(x.value) >= 0; });
+  window.scrollTo(0,0);
+}
+
+/* ================= صندوق الانتظار ================= */
+function viewOutbox(V){
+  obAll().then(function(all){
+    if(!all.length){ V.innerHTML = '<div class="card center"><h2>لا توجد عمليات بانتظار الإرسال ✓</h2></div>'; return; }
+    V.innerHTML = '<div class="card"><h2>بانتظار الإرسال ('+all.length+')</h2><p class="muted" style="margin-bottom:10px">محفوظة على هذا الجهاز وتُرسل تلقائياً عند توفر الشبكة.</p><ul class="list">'
+      + all.map(function(it){ return '<li style="cursor:default"><div class="grow"><div class="t">'+esc(it.label||it.type)+'</div><div class="s">'+fmtDT(it.created)+' · '+it.photos.length+' صور'
+        + (it.error ? '<div class="msg err" style="margin-top:6px">'+esc(it.error)+'</div>' : '')+'</div></div>'
+        + (it.error ? '<button class="btn danger" onclick="dropOb(\''+it.client_ref+'\')">حذف</button>' : '') + '</li>'; }).join('')
+      + '</ul><button class="btn" style="margin-top:10px" onclick="processOutbox().then(function(){viewOutbox($(\'view\'))})">إرسال الآن</button></div>';
+  });
+}
+function dropOb(k){ if(window.confirm('حذف هذه العملية نهائياً من الجهاز؟')) obDel(k).then(function(){ refreshOutboxBtn(); viewOutbox($('view')); }); }
+
+/* ================= البدء ================= */
+function showLogin(msg){
+  ME = null; $('tabs').innerHTML = '';
+  $('view').innerHTML = '<div class="card center"><h2>'+esc(msg || 'سجّل الدخول أولاً')+'</h2><p class="muted">نظام الإيواء يستخدم نفس حساب البوابة.</p><p style="margin-top:14px"><a class="btn" href="home.html">الذهاب لتسجيل الدخول</a></p></div>';
+}
+(function start(){
+  try { token = localStorage.getItem(SESSION_KEY); } catch(e){}
+  if(!token){ showLogin(); return; }
+  rpc('imp_session').then(function(s){
+    ME = s; ME.all_sites.forEach(function(x){ SITES[x.code] = x.name; });
+    $('whoName').textContent = s.name; $('roleName').textContent = ROLE_NAMES[s.role] || s.role;
+    route(); processOutbox();
+  }).catch(function(e){
+    if(/NO_ACCESS/.test(e.code||'')) showLogin('ليست لك صلاحية في نظام الإيواء بعد');
+    else if(/SESSION_EXPIRED/.test(e.code||'')) showLogin('انتهت الجلسة');
+    else $('view').innerHTML = '<div class="msg err">'+esc(e.message)+'</div>';
+  });
+})();
+</script>
+</body>
+</html>
