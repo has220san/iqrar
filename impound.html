@@ -155,7 +155,7 @@ var GPS_MAX_M = 10;
 var ROLE_NAMES = {manager:'المدير',guard:'حارس الإيواء',data_entry:'مدخل البيانات',reception:'الاستقبال',accountant:'المحاسب',dhahban:'موظف ذهبان'};
 var STATUS = {1:'بانتظار المراجعة',2:'مكتملة البيانات',3:'في النقل',4:'طلب إطلاق',5:'مدفوعة',6:'إذن منتهٍ',7:'خرجت'};
 var KIND = {police_doc:'ورقة الإيواء',front:'الأمام',back:'الخلف',right:'الجانب الأيمن',left:'الجانب الأيسر',vin:'رقم الهيكل',
-            parking:'في مكانها',belongings:'مقتنيات',transfer_out:'خروج للنقل',transfer_in:'استلام بعد النقل'};
+            parking:'في مكانها',belongings:'مقتنيات',transfer_out:'خروج للنقل',transfer_in:'استلام بعد النقل',archive:'أرشيف'};
 var INTAKE_STEPS = [
   {kind:'police_doc', title:'ورقة الإيواء الموقّعة من الشرطة', hint:'صوّر الورقة كاملة وواضحة'},
   {kind:'front', title:'المركبة من الأمام', hint:'يجب أن تظهر اللوحة'},
@@ -215,13 +215,20 @@ function filesFn(body){
 /* روابط عرض الصور (مؤقتة) */
 var urlCache = {};
 function loadPhotoUrls(paths){
-  var need = paths.filter(function(p){ return p && !urlCache[p]; });
+  var need = paths.filter(function(p){ return p && p.indexOf('v/') === 0 && !urlCache[p]; });
   if(!need.length) return Promise.resolve();
   return filesFn({action:'view', paths: need}).then(function(j){ Object.assign(urlCache, j.urls||{}); });
 }
 function photoGrid(photos){
   if(!photos.length) return '<div class="muted">لا توجد صور</div>';
   return '<div class="photos">' + photos.map(function(p){
+    if(p.drive_id){
+      /* صور الأرشيف في الدرايف: تُعرض لمن له صلاحية على المجلد، وتفتح في الدرايف */
+      var dcap = (p.doc_type || 'أرشيف') + (p.created_at ? ' · ' + fmtDate(p.created_at) : '');
+      return '<a class="ph" target="_blank" rel="noopener" title="'+esc(p.source_name||'')+'" href="https://drive.google.com/file/d/'+encodeURIComponent(p.drive_id)+'/view">'
+        + '<img loading="lazy" referrerpolicy="no-referrer" src="https://drive.google.com/thumbnail?id='+encodeURIComponent(p.drive_id)+'&sz=w400" alt="" onerror="this.remove()">'
+        + '<span>'+esc(dcap)+'</span></a>';
+    }
     var u = p.blobUrl || urlCache[p.path] || '';
     var cap = KIND[p.kind] + (p.note ? ' — ' + p.note : '');
     return '<div class="ph" data-src="'+esc(u)+'" data-cap="'+esc(cap + (p.created_at? ' · '+fmtDT(p.created_at):'') + (p.taken_by? ' · '+p.taken_by:''))+'" onclick="openPh(this)">'
@@ -650,6 +657,7 @@ function renderVehicle(V, v){
   var main = v.photos.filter(function(x){ return ['police_doc','front','back','right','left','vin','parking'].indexOf(x.kind) >= 0 && !x.movement_id; });
   var bel = v.photos.filter(function(x){ return x.kind === 'belongings'; });
   var mv = v.photos.filter(function(x){ return x.movement_id; });
+  var arc = v.photos.filter(function(x){ return x.kind === 'archive'; });
   var last = v.photos.filter(function(x){ return x.lat && (x.kind==='parking' || x.kind==='transfer_in'); }).pop();
   var canEdit = can('data_entry') && v.status !== 7;
   var atSite = ME.role==='manager' || ME.sites.indexOf(v.site) >= 0;
@@ -659,7 +667,7 @@ function renderVehicle(V, v){
     + '<div class="muted">ملف <span class="mono">#'+v.id+'</span> · '+esc(v.site_name)+' · دخول '+fmtDT(v.entry_at)+(v.status!==7&&v.entry_at?' ('+days(v.entry_at)+' يوماً)':'')+'</div></div>'
     + (last ? '<a class="btn ghost" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+last.lat+','+last.lng+'">📍 مكانها على الخريطة</a>' : '') + '</div></div>';
 
-  h += '<div class="grid2"><div class="card"><h3>الصور</h3>' + photoGrid(main) + '</div><div class="card">';
+  h += '<div class="grid2">' + (main.length || v.site !== 'archive' ? '<div class="card"><h3>الصور</h3>' + photoGrid(main) + '</div>' : '') + '<div class="card">';
   if(canEdit) h += editForm(v);
   else h += '<h3>البيانات</h3><dl class="kv">'
     + kv('رقم الإيواء', v.impound_no, true) + kv('اللوحة', v.plate) + kv('رقم الهيكل', v.vin, true)
@@ -673,10 +681,13 @@ function renderVehicle(V, v){
       + Object.keys(v.legacy_notes).map(function(k){ return kv(k, v.legacy_notes[k]); }).join('') + '</dl></div>';
   }
 
-  h += '<div class="card"><div class="row"><h3 class="grow">المقتنيات</h3>'
+  if(v.site !== 'archive' || bel.length) h += '<div class="card"><div class="row"><h3 class="grow">المقتنيات</h3>'
     + (can('guard','dhahban','data_entry') && atSite && v.status!==7 ? '<button class="btn ghost" id="addBel">+ صور مقتنيات</button>' : '') + '</div>'
     + (bel.length ? photoGrid(bel) : '<div class="muted">لم تُسجل مقتنيات</div>') + '<div id="belBox"></div></div>';
 
+  if(arc.length){
+    h += '<div class="card"><h3>صور الأرشيف القديم ('+arc.length+')</h3><p class="muted" style="margin-bottom:8px">محفوظة في Google Drive. تظهر لمن شوركت معه مجلدات الأرشيف، وتفتح في الدرايف عند الضغط.</p>' + photoGrid(arc) + '</div>';
+  }
   if(can('guard','dhahban') && atSite && inside){
     h += '<div class="card"><h3>نقل إلى موقع آخر</h3><div id="trBox"><button class="btn amber" id="trOpen">نقل المركبة</button></div></div>';
   }

@@ -347,9 +347,8 @@ begin
         'ملاحظات الاستيراد',nullif(v.legacy->>'issues',''))) end,
     'site_name',(select name from imp_sites where code=v.site),
     'driver',(select to_jsonb(d) from (select id,kind,name,phone from imp_drivers where id=v.driver_id) d),
-    'photos',(select coalesce(jsonb_agg(jsonb_build_object('id',id,'kind',kind,'path',path,'lat',lat,'lng',lng,
-               'accuracy',accuracy,'note',note,'taken_by',taken_by,'created_at',created_at,'movement_id',movement_id) order by id),'[]')
-              from imp_photos where vehicle_id=v.id),
+    'photos',(select coalesce(jsonb_agg(to_jsonb(ph) - 'vehicle_id' order by ph.id),'[]')
+              from imp_photos ph where ph.vehicle_id=v.id),
     'movements',(select coalesce(jsonb_agg(jsonb_build_object('id',m.id,'from',f.name,'to',t.name,'to_site',m.to_site,'state',m.state,
                'sent_by',m.sent_by,'sent_at',m.sent_at,'received_by',m.received_by,'received_at',m.received_at,
                'driver',(select name from imp_drivers where id=m.driver_id)) order by m.id),'[]')
