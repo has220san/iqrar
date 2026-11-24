@@ -348,7 +348,10 @@ begin
     'site_name',(select name from imp_sites where code=v.site),
     'driver',(select to_jsonb(d) from (select id,kind,name,phone from imp_drivers where id=v.driver_id) d),
     'photos',(select coalesce(jsonb_agg(to_jsonb(ph) - 'vehicle_id' order by ph.id),'[]')
-              from imp_photos ph where ph.vehicle_id=v.id),
+              from imp_photos ph where ph.vehicle_id=v.id
+                 -- صور الأرشيف القديم المربوطة بنفس اللوحة تظهر أيضاً في ملف المركبة الحالي
+                 or (ph.kind='archive' and v.site<>'archive' and v.plate_key not like 'LEGACY:%'
+                     and ph.vehicle_id in (select a.id from imp_vehicles a where a.site='archive' and a.plate_key=v.plate_key))),
     'movements',(select coalesce(jsonb_agg(jsonb_build_object('id',m.id,'from',f.name,'to',t.name,'to_site',m.to_site,'state',m.state,
                'sent_by',m.sent_by,'sent_at',m.sent_at,'received_by',m.received_by,'received_at',m.received_at,
                'driver',(select name from imp_drivers where id=m.driver_id)) order by m.id),'[]')
