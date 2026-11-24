@@ -315,6 +315,12 @@ function enter(user){
   document.getElementById('meRole').textContent = user.role;
   document.getElementById('gate').classList.add('hidden');
   document.getElementById('app').classList.add('on');
+  // موظفو الإيواء فقط (الدور impound): لا تظهر لهم الإقرارات ولا الفواتير
+  if(user.role === 'impound'){
+    ['cardIqrar','cardInv'].forEach(function(id){ var c = document.getElementById(id); if(c) c.remove(); });
+    document.getElementById('invNote').textContent = '';
+    return;
+  }
   setupInvoiceCard();
 }
 
